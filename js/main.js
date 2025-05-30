@@ -22,7 +22,6 @@ Responsive dashboard with expense summary cards
 Interactive charts showing spending over time
 Alerts when approaching or exceeding budget limits
 Exportable expense reports
-
 */
 
 import { Expense } from "./models/Expense.js";
@@ -51,18 +50,28 @@ expenseForm.addEventListener('submit', (e) => {
     // Grab all the form data 
     const expenseFormData = new FormData(expenseForm);
     const data = Object.fromEntries(expenseFormData.entries());
-    console.log(data)
-    // Description is not included in the FormData entries
-    const description = document.querySelector(".description").value;
-    const date = data.date || getTodayDateString()
 
-    const expense = new Expense(parseFloat(data.amount), description, data.categories, date);
-    
-    // Append the expense object to the ExpenseList object
-    expenseList.addExpense(expense)
-    renderTable(expenseList.expenses);
+    const expenseData = {
+        amount: "" ? 0 : parseFloat(data.amount),
+        description: data.description,
+        category: data.categories.charAt(0).toUpperCase() + data.categories.slice(1),
+        date: data.date || getTodayDateString(),
+    }
+
+    if (editingId){
+        expenseList.modifyExpense(editingId, expenseData);
+        editingId = null;
+        // Reset the header and submission button to default state
+        document.querySelector(".submit-button").textContent = "Add Expense"
+        document.querySelector(".new-expense-heading").textContent = "Add a New Expense"
+    } else {    
+        const newExpense = new Expense(...Object.values(expenseData));
+        expenseList.addExpense(newExpense)
+    }
     
     e.target.reset();
+    // Append the expense object to the ExpenseList object
+    renderTable(expenseList.expenses);
 });
 
 // Filtering logic
@@ -76,8 +85,82 @@ document.querySelector('#apply-filters').addEventListener('click', () => {
     };
 
     const filtered = expenseList.getFiltered(filters);
+    updateSummaryAndAlerts(expenseList)
     renderTable(filtered)
 });
+
+// Edit the form function 
+let editingId = null;
+const populateFormForEdit = (expense) => {
+    document.querySelector("#amount").value = expense.amount;
+    document.querySelector("#categories").value = expense.category
+    document.querySelector("#date").value = new Date(expense.date).toISOString().split(["T"])[0];
+    document.querySelector("#description").value = expense.description;
+
+    editingId = expense.id;
+
+    document.querySelector(".submit-button").textContent = "Update Expense"
+    document.querySelector(".new-expense-heading").textContent = "Edit Expense"
+}
+
+// Adding event listeners for the delete and edit buttons
+document.querySelectorAll(".delete-btn").forEach( btn => {
+    btn.addEventListener("click", () => {
+        const id = btn.dataset.id;
+        expenseList.removeExpense(id);
+        renderTable(expenseList.expenses)
+    });
+})
+
+document.querySelectorAll(".edit-btn").forEach( btn => {
+    btn.addEventListener("click", () => {
+        console.log("CLICK!")
+        const id = btn.dataset.id;
+        const expense = expenseList.expenses.find(expense => expense.id === id);
+        populateFormForEdit(expense)
+    });
+})
+
+function updateSummaryAndAlerts(expenseList, budgetsByCategory = {}) {
+    const expenses = expenseList.expenses;
+
+    const totalSpent = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+    const days = new Set(expenses.map(exp => new Date(exp.date).toISOString().split('T')[0]));
+    const avgSpending = days.size > 0 ? totalSpent / days.size : 0;
+
+    const remainingBudget = Object.entries(budgetsByCategory).reduce((remaining, [category, budget]) => {
+        const spent = expenses
+            .filter(e => e.category === category)
+            .reduce((sum, e) => sum + e.amount, 0);
+        return remaining + Math.max(0, budget - spent);
+    }, 0);
+
+    document.querySelector(".total-spent").textContent = `$${totalSpent.toFixed(2)}`;
+    document.querySelector(".average-spending").textContent = `$${avgSpending.toFixed(2)}`;
+    document.querySelector(".remaining-budget").textContent = `$${remainingBudget.toFixed(2)}`;
+
+    // ALERTS
+    const alerts = [];
+    Object.entries(budgetsByCategory).forEach(([category, budget]) => {
+        const spent = expenses
+            .filter(e => e.category === category)
+            .reduce((sum, e) => sum + e.amount, 0);
+        if (spent >= budget) {
+            alerts.push(`You have exceeded your ${category} budget!`);
+        } else if (spent >= budget * 0.9) {
+            alerts.push(`You're approaching your ${category} budget.`);
+        }
+    });
+
+    const alertsList = document.querySelector("#alerts-list");
+    alertsList.innerHTML = "";
+    alerts.forEach(msg => {
+        const li = document.createElement("li");
+        li.textContent = msg;
+        alertsList.appendChild(li);
+    });
+}
+
 
 // Initial table rendering
 renderTable(expenseList.expenses)

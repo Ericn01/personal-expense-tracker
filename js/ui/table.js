@@ -9,8 +9,13 @@ export const renderTable = (data) => {
             <td>${exp.category}</td>
             <td>$${exp.amount.toFixed(2)}</td>
             <td>${exp.description}</td>
+            <td> 
+                <button class="edit-btn" data-id=${exp.id}"> ✏️ </button>
+                <button class="delete-btn"data-id=${exp.id}"> 🗑️ </button>
+            </td>
         `;
 
         tbody.appendChild(row);
     })
 }
+

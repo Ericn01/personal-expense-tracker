@@ -13,6 +13,25 @@ export class ExpenseList {
         this.expenses.push(expense);
         saveExpensesToStorage(this.expenses)
     }
+    modifyExpense(expenseId, updateData){
+        const expenseIndex = this.expenses.findIndex( expense => expense.id === expenseId);
+        if (expenseIndex === -1){
+            console.log("The provided expense could not be located");
+        } else {
+            this.expenses[index] = {
+                ...this.expenses[index],
+                ...updateData,
+                data: new Date(updateData.date),
+            };
+            saveExpensesToStorage(this.expenses);
+        }
+
+    }
+
+    removeExpense(expenseId){
+        this.expenses = this.expenses.filter(expense => expense.id != expenseId);
+        saveExpensesToStorage(this.expenses);
+    }
 
     getFiltered( { startDate, endDate, category, minAmount, maxAmount }) {
         return this.expenses.filter( exp => {
