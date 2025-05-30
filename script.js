@@ -41,28 +41,68 @@ const Categories = Object.freeze({
 
 
 class Expense {
-    constructor(amount, description, category, date){
-        this.amount = amount;
+    constructor(amount, description, category, date = new Date(), id=crypto.randomUUID()){
+        this.amount = parseFloat(amount);
         this.description = description;
         this.category = category;
-        this.date = date;
-    }
-
-    displayExpense(){
-
+        this.date = new Date(date);
+        this.id = id;  // create a unique identifier for the expense
     }
 }
 
+class ExpenseList {
+    constructor(){
+        this.expenses = [];
+    }
 
+    addExpense(expense){
+        this.expenses.push(expense);
+    }
+
+    getFiltered( { startDate, endDate, category, minAmount, maxAmount }) {
+        return this.expenses.filter( exp => {
+            const matchDate = (!startDate || exp.date >= new Date(startDate)) && 
+                            (!endDate || exp.date <= new Date(endDate));
+            const matchCategory = !category || exp.category === category;
+            const matchAmount = (!minAmount || exp.amount >= minAmount) &&
+                                (!maxAmount || exp.amount <= maxAmount);
+
+            return matchDate && matchCategory && matchAmount;
+        } )
+    }
+
+    // Save expenses data to localStorage
+    saveExpenses() {
+        localStorage.setItem("expenses", JSON.stringify(this.expenses))
+    }
+    // Retrieve expenses data from localStorage
+    loadExpenses(){
+        expensesData = localStorage.getItem("expenses");
+        if (!expensesData){
+            return [];
+        }
+        return JSON.parse(expensesData).map(e => new Expense(e.amount, e.description, e.category, e.date, e.id));
+    }
+}
+
+// Create a global expenseList (might need to be a singleton)
+const expenseList = new ExpenseList();
+/* 
+TESTING DATA --> Remove later
+*/
+expenseList.addExpense(new Expense(50, "food", "Groceries", "2025-05-30"));
+expenseList.addExpense(new Expense(200, "housing", "Rent", "2025-05-05"));
 
 // Populate the category inputs
-const categoryDropdown = document.querySelector("#categories");
-Object.entries(Categories).forEach( ([key, symbol]) => {
+
+function populateCategoryDropdown (HTMLDropdown) {
+    Object.entries(Categories).forEach( ([key, symbol]) => {
     const option = document.createElement("option");
     option.value = symbol.description; 
     option.textContent = symbol.description.charAt(0).toUpperCase() + symbol.description.slice(1);
-    categoryDropdown.appendChild(option);
+    HTMLDropdown.appendChild(option);
 });
+}
 
 // Grab the new entry HTML elements 
 const expenseForm = document.querySelector("#new-entry-form");
@@ -80,10 +120,57 @@ expenseForm.addEventListener('submit', (e) => {
     const expenseFormData = new FormData(expenseForm);
     const data = Object.fromEntries(expenseFormData.entries());
 
-    console.log(data);
+    // Description is not included in the FormData entries
+    const description = document.querySelector(".description").value;
+
+    const expense = new Expense(parseFloat(data.amount, description, data.category, data.date))
+    // Append the expense object to the ExpenseList object
+    expenseList.addExpense(expense)
 });
 
 
+/* Expenses table section */
+const expensesTable = document.querySelector(".expenses-table");
+
+function renderTable (data) {
+    const tbody = document.querySelector(".expenses-table tbody");
+    tbody.innerHTML = '';
+
+    data.forEach(exp => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${new Date(exp.date).toISOString().split('T')[0]}</td>
+            <td>${exp.category}</td>
+            <td>$${exp.amount.toFixed(2)}</td>
+            <td>${exp.description}</td>
+        `;
+
+        tbody.appendChild(row);
+    })
+}
+
+// Filtering logic
+document.querySelector('#apply-filters').addEventListener('click', () => {
+    const filters = {
+        startDate: document.querySelector("#start-date").value,
+        endDate: document.querySelector("#end-date").value,
+        category: document.querySelector("#filter-category").value,
+        minAmount: document.querySelector("#min-amount").value || null,
+        maxAmount: document.querySelector("#max-amount").value || null 
+    };
+
+    const filtered = expenseList.getFiltered(filters);
+    renderTable(filtered)
+});
+
+// Populate the HTML dropdown menus (categories)
+const newEntryCategoriesDropdown = document.querySelector("#categories");
+const tableFilterCategoriesDropdown = document.querySelector("#filter-category");
+
+// Populate the dropdowns
+[newEntryCategoriesDropdown, tableFilterCategoriesDropdown].forEach( dropdownElem => populateCategoryDropdown(dropdownElem))
+
+renderTable(expenseList.expenses)
 
 
 
