@@ -1,0 +1,77 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.new-expense-heading{
+    font-size: 1.4rem;
+    color: #0f0f0f;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid gray;
+}
+
+/* New entry styling */
+.add-entry{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    background-color: #f4f6f8;
+    min-height: 100vh;
+}
+
+/* New entry form styling */
+.new-entry-form {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 450px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Form label styling */
+.new-entry-form label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+    color: #333;
+}
+
+/* Input + select fields */
+.new-entry-form input,
+.new-entry-form select {
+    width: 100%; 
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 0.95rem;
+    transition: border-color 0.3s ease;
+}
+
+.description-entry{
+    min-height: 40px;
+    font-size: 0.95rem;
+    color: #555
+}
+
+
+/* Expense entry submission button */
+.submit-button{
+    padding: 0.75rem;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.submit-button:hover{
+    background-color: #0056b5;
+}

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Expense Tracker</title>
+    <link href="styles.css" rel="stylesheet" type="text/css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1> Personal Expense Tracker </h1>
+    </header>
+    <main>
+        <section class="grid-container">
+            <section class="add-entry">
+                
+                <form class="new-entry-form" id="new-entry-form">
+                    <h3 class="new-expense-heading"> Add a New Expense</h3>
+                
+
+                    <div class="amount-input">
+                        <label for="amount">Amount ($): </label>
+                        <input id="amount" name="amount" type="number" max="100000" min="0" placeholder="82.00"/>
+                    </div>
+                
+                    <div class="category-input">
+                        <label for="categories"> Category </label>
+                        <select name="categories" id="categories">
+                            <!-- Dropdown inputs will be generated using JS -->
+                        </select>
+                    </div>
+                    <div class="date-input">
+                        <label>Date</label>
+                        <input type="date" name="date" class="date" id="date">
+                    </div>
+
+                    <div class="description-entry">
+                        <label> Description</label>
+                        <textarea class="description"></textarea>
+                    </div>
+
+                    <button class="submit-button" type="submit">Add Expense</button>
+                </form>
+            </section>
+        </section>
+    </main>
+    <footer>
+
+    </footer>
+</body>
+</html>
