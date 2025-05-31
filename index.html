@@ -6,7 +6,9 @@
     <title>Personal Expense Tracker</title>
     <link href="styles.css" rel="stylesheet" type="text/css">
     <link href="summary-alerts.css" rel="stylesheet" type="text/css">
+    <link href="categories-styles.css" rel="stylesheet" type="text/css">
     <script type="module" src="js/main.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js"></script>
 </head>
 <body>
     <header>
@@ -15,52 +17,60 @@
     <main class="dashboard-layout">
         <!-- Sidebar: Add an expense-->
             <aside class="add-entry">
-                <form class="new-entry-form" id="new-entry-form">
-                    <h3 class="new-expense-heading"> Add a New Expense</h3>
+                <div class="card">
+                    <form class="new-entry-form" id="new-entry-form">
+                        <h3 class="new-expense-heading"> Add a New Expense</h3>
 
-                    <div class="amount-input">
-                        <label for="amount">Amount ($): </label>
-                        <input id="amount" name="amount" type="number" max="100000" min="0" placeholder="82.00"/>
-                    </div>
-                
-                    <div class="category-input">
-                        <label for="categories"> Category </label>
-                        <select name="categories" id="categories">
-                            <!-- Dropdown inputs will be generated using JS -->
-                        </select>
-                    </div>
-                    <div class="date-input">
-                        <label>Date</label>
-                        <input type="date" name="date" class="date" id="date">
-                    </div>
+                        <div class="amount-input">
+                            <label for="amount">Amount ($): </label>
+                            <input id="amount" name="amount" type="number" step="0.01" min="0" max="100000" placeholder="82.00" required/>                    
+                        </div>
+                    
+                        <div class="category-input">
+                            <label for="categories"> Category </label>
+                            <select name="categories" id="categories" required>
+                                <!-- Dropdown inputs will be generated using JS -->
+                            </select>
+                        </div>
+                        <div class="date-input">
+                            <label>Date</label>
+                            <input type="date" name="date" class="date" id="date">
+                        </div>
 
-                    <div class="description-entry">
-                        <label>Description</label>
-                        <input type="text" name="description" id="description"/>
-                    </div>
+                        <div class="description-entry">
+                            <label>Description</label>
+                            <input type="text" name="description" id="description"/>
+                        </div>
 
-                    <button class="submit-button" type="submit">Add Expense</button>
-                </form>
+                        <button class="submit-button" type="submit">Add Expense</button>
+                    </form>
+                </div>
+                <!-- Budget Management -->
+                <div class="card budget-section">
+                    <h3>Monthly Budgets</h3>
+                    <div id="budget-list" class="budget-grid"></div>
+                    <button class="btn btn-primary">Save Budgets</button>
+                </div>
             </aside>
             <!-- Main Section -->
             <section class="main-content">
                 <!-- Summary + Alerts placeholder-->
-                <section class="summary-alerts-container">
-                    <div class="summary-cards">
-                        <div class="card total-spent">
-                            <h4> Total Spent </h4>
-                            <p id="total-spent"> $0.00 </p>
+                    <section class="summary-alerts-container">
+                            <div class="summary-cards">
+                        <div class="summary-card">
+                            <h4>Total Spent (This Month)</h4>
+                            <p class="total-spent">$0.00</p>
                         </div>
-                        <div class="card remaining-budget">
-                            <h4> Remaining Budget </h4>
-                            <p id="total-spent"> $0.00 </p>
+                        <div class="summary-card success">
+                            <h4>Remaining Budget</h4>
+                            <p class="remaining-budget">$0.00</p>
                         </div>
-                        <div class="card average-spending">
-                            <h4> Average Daily Spending </h4>
-                            <p id="average-spending">$0.00</p>
+                        <div class="summary-card">
+                            <h4>Average Daily Spending</h4>
+                            <p class="average-spending">$0.00</p>
                         </div>
                     </div>
-                    <div class="alerts">
+                    <div class="alerts" id="alerts-container">
                         <h4> Alerts </h4>
                         <ul id="alerts-list">
                             <!-- Display spending alerts here -->
@@ -68,43 +78,51 @@
                     </div>
                 </section>
 
-                <section class="chart-section">
-                    <!--TBI: Interactive finances chart -->
-                </section>
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>Monthly Spending Trend</h3>
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Spending by Category</h3>
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
             </section>
             <!--Filters + table -->
-            <section class="table-section">
-                <section class="filter-panel">
-                    <h3> Filter Expenses</h3>
-                    <div class="filter-group">
-                        <div class="filter-item">
-                            <label for="start-date">Start Date</label>
-                            <input type="date" id="start-date">
-                        </div>
-                        <div class="filter-item">
-                            <label for="start-date">End Date</label>
-                            <input type="date" id="end-date">
-                        </div>
-                        <div class="filter-item">
-                            <label for="filter-category">Category</label>
-                            <select name="filter-category" id="filter-category">
-                                <option value="">All Categories</option>
-                                <!-- Populate from the available categories -->
-                            </select>
-                        </div>
-                        <div class="filter-item">
-                            <label for="min-amount">Min Amount ($)</label>
-                            <input type="number" id="min-amount" placeholder="e.g., 10">
-                        </div>
-                        <div class="filter-item">
-                            <label for="max-amount">Max Amount ($)</label>
-                            <input type="number" id="max-amount" placeholder="e.g., 200">
-                        </div>
+            <div class="filter-panel">
+                <h3>Filter Expenses</h3>
+                <div class="filter-group">
+                    <div class="filter-item">
+                        <label for="start-date">Start Date</label>
+                        <input type="date" id="start-date">
                     </div>
-                                        
-                    <button id="apply-filters">Apply Filters</button>
-                </section>
+                    <div class="filter-item">
+                        <label for="end-date">End Date</label>
+                        <input type="date" id="end-date">
+                    </div>
+                    <div class="filter-item">
+                        <label for="filter-category">Category</label>
+                        <select id="filter-category">
+                            <option value="">All Categories</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label for="min-amount">Min Amount ($)</label>
+                        <input type="number" id="min-amount" placeholder="0">
+                    </div>
+                    <div class="filter-item">
+                        <label for="max-amount">Max Amount ($)</label>
+                        <input type="number" id="max-amount" placeholder="1000">
+                    </div>
+                </div>
+                <div class="filter-buttons">
+                    <button class="btn btn-primary" id="apply-filters">Apply Filters</button>
+                    <button class="btn btn-secondary" id="clear-filters">Clear Filters</button>
+                </div>
+            </div>
 
+            <section class="table-section">
                 <table class="expenses-table">
                     <thead>
                         <tr>
@@ -119,6 +137,11 @@
                     </tbody>
                 </table>
             </section>
+
+            <!-- Export Section -->
+            <div class="export-section">
+                <button class="btn-export">📥 Export to CSV</button>
+            </div>
     </main>
     <footer>
 

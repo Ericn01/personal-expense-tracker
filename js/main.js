@@ -30,67 +30,106 @@ import { populateCategoryDropdown } from "./utils/categories.js";
 import { getTodayDateString } from "./utils/helpers.js";
 import { renderTable } from "./ui/table.js";
 
-// Create a global expenseList (might need to be a singleton)
+ // Global variables
 const expenseList = new ExpenseList();
+let editingId = null;
+let monthlyChart = null;
+let categoryChart = null;
+let budgets = {};
 
 // Grab the HTML category dropdown elements
 const newEntryCategoriesDropdown = document.querySelector("#categories");
 const tableFilterCategoriesDropdown = document.querySelector("#filter-category");
 
-// Populate the dropdowns
-[newEntryCategoriesDropdown, tableFilterCategoriesDropdown]
-    .forEach( dropdownElem => populateCategoryDropdown(dropdownElem))
-
-// Grab the new entry HTML elements 
-const expenseForm = document.querySelector("#new-entry-form");
-// New expense form submission
-expenseForm.addEventListener('submit', (e) => {
-    e.preventDefault(); // We don't want the default behaviour (resets the page)
-
-    // Grab all the form data 
-    const expenseFormData = new FormData(expenseForm);
-    const data = Object.fromEntries(expenseFormData.entries());
-
-    const expenseData = {
-        amount: "" ? 0 : parseFloat(data.amount),
-        description: data.description,
-        category: data.categories.charAt(0).toUpperCase() + data.categories.slice(1),
-        date: data.date || getTodayDateString(),
-    }
-
-    if (editingId){
-        expenseList.modifyExpense(editingId, expenseData);
-        editingId = null;
-        // Reset the header and submission button to default state
-        document.querySelector(".submit-button").textContent = "Add Expense"
-        document.querySelector(".new-expense-heading").textContent = "Add a New Expense"
-    } else {    
-        const newExpense = new Expense(...Object.values(expenseData));
-        expenseList.addExpense(newExpense)
-    }
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    // Set today's date as default
+    document.getElementById('date').valueAsDate = new Date();
     
-    e.target.reset();
-    // Append the expense object to the ExpenseList object
-    renderTable(expenseList.expenses);
+    // Populate the dropdowns
+    [newEntryCategoriesDropdown, tableFilterCategoriesDropdown].forEach( dropdownElem => populateCategoryDropdown(dropdownElem))
+    
+    // Initialize budgets
+    
+    //loadBudgets();
+    
+    // Setup event listeners
+    setupEventListeners();
+    
+    // Initial render
+    updateAll();
 });
 
-// Filtering logic
-document.querySelector('#apply-filters').addEventListener('click', () => {
-    const filters = {
-        startDate: document.querySelector("#start-date").value,
-        endDate: document.querySelector("#end-date").value,
-        category: document.querySelector("#filter-category").value,
-        minAmount: document.querySelector("#min-amount").value || null,
-        maxAmount: document.querySelector("#max-amount").value || null 
-    };
 
-    const filtered = expenseList.getFiltered(filters);
-    updateSummaryAndAlerts(expenseList)
-    renderTable(filtered)
+function setupEventListeners () {
+    // New expense form submission
+    document.querySelector("#new-entry-form").addEventListener('submit', (e) => {
+        e.preventDefault(); // We don't want the default behaviour (resets the page)
+
+        // Grab all the form data 
+        const expenseFormData = new FormData(expenseForm);
+        const data = Object.fromEntries(expenseFormData.entries());
+
+        const expenseData = {
+            amount: "" ? 0 : parseFloat(data.amount),
+            description: data.description,
+            category: data.categories.charAt(0).toUpperCase() + data.categories.slice(1),
+            date: data.date || getTodayDateString(),
+        }
+
+        if (editingId){
+            expenseList.modifyExpense(editingId, expenseData);
+            editingId = null;
+            // Reset the header and submission button to default state
+            document.querySelector(".submit-button").textContent = "Add Expense"
+            document.querySelector(".new-expense-heading").textContent = "Add a New Expense"
+        } else {    
+            const newExpense = new Expense(...Object.values(expenseData));
+            expenseList.addExpense(newExpense)
+        }
+        
+        e.target.reset();
+        // Append the expense object to the ExpenseList object
+        renderTable(expenseList.expenses);
+    });
+
+    // Filtering logic
+    document.querySelector('#apply-filters').addEventListener('click', () => {
+        const filters = {
+            startDate: document.querySelector("#start-date").value,
+            endDate: document.querySelector("#end-date").value,
+            category: document.querySelector("#filter-category").value,
+            minAmount: document.querySelector("#min-amount").value || null,
+            maxAmount: document.querySelector("#max-amount").value || null 
+        };
+
+        const filtered = expenseList.getFiltered(filters);
+        updateSummaryAndAlerts(expenseList)
+        renderTable(filtered)
+
+        // Adding event listeners for the delete and edit buttons
+    document.querySelectorAll(".delete-btn").forEach( btn => {
+        btn.addEventListener("click", () => {
+            const id = btn.dataset.id;
+            expenseList.removeExpense(id);
+            renderTable(expenseList.expenses)
+        });
+    })
+
+    document.querySelectorAll(".edit-btn").forEach( btn => {
+        btn.addEventListener("click", () => {
+            const id = btn.dataset.id;
+            const expense = expenseList.expenses.find(expense => expense.id === id);
+            populateFormForEdit(expense)
+        });
+    })
 });
+}
+
+
+
 
 // Edit the form function 
-let editingId = null;
 const populateFormForEdit = (expense) => {
     document.querySelector("#amount").value = expense.amount;
     document.querySelector("#categories").value = expense.category
@@ -103,23 +142,7 @@ const populateFormForEdit = (expense) => {
     document.querySelector(".new-expense-heading").textContent = "Edit Expense"
 }
 
-// Adding event listeners for the delete and edit buttons
-document.querySelectorAll(".delete-btn").forEach( btn => {
-    btn.addEventListener("click", () => {
-        const id = btn.dataset.id;
-        expenseList.removeExpense(id);
-        renderTable(expenseList.expenses)
-    });
-})
 
-document.querySelectorAll(".edit-btn").forEach( btn => {
-    btn.addEventListener("click", () => {
-        console.log("CLICK!")
-        const id = btn.dataset.id;
-        const expense = expenseList.expenses.find(expense => expense.id === id);
-        populateFormForEdit(expense)
-    });
-})
 
 function updateSummaryAndAlerts(expenseList, budgetsByCategory = {}) {
     const expenses = expenseList.expenses;

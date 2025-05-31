@@ -1,0 +1,20 @@
+/* Category Colors */
+.category-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.category-housing { background-color: #dbeafe; color: #1e40af; }
+.category-food { background-color: #fce7f3; color: #be185d; }
+.category-transportation { background-color: #e0e7ff; color: #4338ca; }
+.category-healthcare { background-color: #dcfce7; color: #15803d; }
+.category-education { background-color: #fef3c7; color: #a16207; }
+.category-personal { background-color: #f3e8ff; color: #7c3aed; }
+.category-entertainment { background-color: #fee2e2; color: #dc2626; }
+.category-family { background-color: #cffafe; color: #0891b2; }
+.category-finances { background-color: #d1fae5; color: #047857; }
+.category-donations { background-color: #fce7f3; color: #be185d; }
+.category-business { background-color: #e0e7ff; color: #4338ca; }

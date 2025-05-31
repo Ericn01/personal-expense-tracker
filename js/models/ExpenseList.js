@@ -9,10 +9,10 @@ export class ExpenseList {
     }
 
     addExpense(expense){
-        console.log(expense)
         this.expenses.push(expense);
         saveExpensesToStorage(this.expenses)
     }
+
     modifyExpense(expenseId, updateData){
         const expenseIndex = this.expenses.findIndex( expense => expense.id === expenseId);
         if (expenseIndex === -1){
