@@ -1,41 +1,42 @@
-/*
-Core Requirements
-Main Function: Build a web application that helps users track expenses, visualize spending patterns, and manage budgets.
-Key Features to Implement:
-
-1. Add/edit/delete expense entries with categories (food, transport, entertainment, etc.)
-2. Set monthly budgets per category and track spending against limits
-3. Display expenses in a filterable table (by date range, category, amount)
-
-Show spending trends with interactive charts (monthly totals, category breakdowns)
-Calculate and display key metrics (total spent, remaining budget, average daily spending)
-
-Expected Inputs:
-
-Expense amount, description, category, and date
-Budget limits for each category
-Date ranges for filtering
-
-Expected Outputs:
-
-Responsive dashboard with expense summary cards
-Interactive charts showing spending over time
-Alerts when approaching or exceeding budget limits
-Exportable expense reports
-*/
-
-import { Expense } from "./models/Expense.js";
 import { ExpenseList } from "./models/ExpenseList.js";
 import { populateCategoryDropdown } from "./utils/categories.js";
-import { getTodayDateString } from "./utils/helpers.js";
 import { renderTable } from "./ui/table.js";
+import { applyFilters, clearFilters, handleFormSubmit, deleteExpense, modifyExpense } from './utils/eventListeners.js'
+import { MonthNavigator } from "./models/MonthNavigator.js";
+import { BudgetManager } from "./models/BudgetManager.js";
 
- // Global variables
+// Global variables
 const expenseList = new ExpenseList();
-let editingId = null;
+export let editingId = null; // Export so eventListeners can access it
 let monthlyChart = null;
 let categoryChart = null;
 let budgets = {};
+let monthNavigator = new MonthNavigator(expenseList, updateAll);
+
+// Export functions that eventListeners needs to call
+export function setEditingId(id) {
+    editingId = id;
+}
+
+export function getEditingId() {
+    return editingId;
+}
+
+export function updateAll() {
+    // Get expenses for the selected month
+    const { start, end } = monthNavigator.getDateRange();
+    const monthlyExpenses = expenseList.getFiltered({
+        startDate: start.toISOString(),
+        endDate: end.toISOString()
+    });
+    
+    renderTable(monthlyExpenses);
+    updateSummaryAndAlerts();
+    // Add event listeners for edit/delete buttons after rendering
+    deleteExpense(expenseList);
+    modifyExpense(expenseList);
+    // updateCharts();
+}
 
 // Grab the HTML category dropdown elements
 const newEntryCategoriesDropdown = document.querySelector("#categories");
@@ -43,15 +44,15 @@ const tableFilterCategoriesDropdown = document.querySelector("#filter-category")
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    // Creating an instance of the budget manager
+    const budgetContainer = document.querySelector('#budget-list')
+    new BudgetManager(budgetContainer) // instantiate the budget manager class
+
     // Set today's date as default
     document.getElementById('date').valueAsDate = new Date();
     
     // Populate the dropdowns
     [newEntryCategoriesDropdown, tableFilterCategoriesDropdown].forEach( dropdownElem => populateCategoryDropdown(dropdownElem))
-    
-    // Initialize budgets
-    
-    //loadBudgets();
     
     // Setup event listeners
     setupEventListeners();
@@ -60,130 +61,79 @@ document.addEventListener('DOMContentLoaded', () => {
     updateAll();
 });
 
+// Remove the duplicate editExpense and deleteExpense functions from here
+// They will be handled in eventListeners.js
 
-function setupEventListeners () {
-    // New expense form submission
-    document.querySelector("#new-entry-form").addEventListener('submit', (e) => {
-        e.preventDefault(); // We don't want the default behaviour (resets the page)
+function setupEventListeners() {
+    // Form submission
+    document.querySelector('#new-entry-form').addEventListener('submit', e => handleFormSubmit(e, expenseList, updateAll));
 
-        // Grab all the form data 
-        const expenseFormData = new FormData(expenseForm);
-        const data = Object.fromEntries(expenseFormData.entries());
-
-        const expenseData = {
-            amount: "" ? 0 : parseFloat(data.amount),
-            description: data.description,
-            category: data.categories.charAt(0).toUpperCase() + data.categories.slice(1),
-            date: data.date || getTodayDateString(),
-        }
-
-        if (editingId){
-            expenseList.modifyExpense(editingId, expenseData);
-            editingId = null;
-            // Reset the header and submission button to default state
-            document.querySelector(".submit-button").textContent = "Add Expense"
-            document.querySelector(".new-expense-heading").textContent = "Add a New Expense"
-        } else {    
-            const newExpense = new Expense(...Object.values(expenseData));
-            expenseList.addExpense(newExpense)
-        }
-        
-        e.target.reset();
-        // Append the expense object to the ExpenseList object
-        renderTable(expenseList.expenses);
-    });
-
-    // Filtering logic
-    document.querySelector('#apply-filters').addEventListener('click', () => {
-        const filters = {
-            startDate: document.querySelector("#start-date").value,
-            endDate: document.querySelector("#end-date").value,
-            category: document.querySelector("#filter-category").value,
-            minAmount: document.querySelector("#min-amount").value || null,
-            maxAmount: document.querySelector("#max-amount").value || null 
-        };
-
-        const filtered = expenseList.getFiltered(filters);
-        updateSummaryAndAlerts(expenseList)
-        renderTable(filtered)
-
-        // Adding event listeners for the delete and edit buttons
-    document.querySelectorAll(".delete-btn").forEach( btn => {
-        btn.addEventListener("click", () => {
-            const id = btn.dataset.id;
-            expenseList.removeExpense(id);
-            renderTable(expenseList.expenses)
-        });
-    })
-
-    document.querySelectorAll(".edit-btn").forEach( btn => {
-        btn.addEventListener("click", () => {
-            const id = btn.dataset.id;
-            const expense = expenseList.expenses.find(expense => expense.id === id);
-            populateFormForEdit(expense)
-        });
-    })
-});
+    // Filters
+    document.querySelector('#apply-filters').addEventListener('click', e => applyFilters(expenseList, monthNavigator))
+    document.querySelector('#clear-filters').addEventListener('click', e => clearFilters(expenseList))
 }
 
-
-
-
-// Edit the form function 
-const populateFormForEdit = (expense) => {
-    document.querySelector("#amount").value = expense.amount;
-    document.querySelector("#categories").value = expense.category
-    document.querySelector("#date").value = new Date(expense.date).toISOString().split(["T"])[0];
-    document.querySelector("#description").value = expense.description;
-
-    editingId = expense.id;
-
-    document.querySelector(".submit-button").textContent = "Update Expense"
-    document.querySelector(".new-expense-heading").textContent = "Edit Expense"
-}
-
-
-
-function updateSummaryAndAlerts(expenseList, budgetsByCategory = {}) {
-    const expenses = expenseList.expenses;
-
-    const totalSpent = expenses.reduce((sum, exp) => sum + exp.amount, 0);
-    const days = new Set(expenses.map(exp => new Date(exp.date).toISOString().split('T')[0]));
+function updateSummaryAndAlerts() {
+    const month = monthNavigator.getCurrentMonth();
+    const year = monthNavigator.getCurrentYear();
+    
+    // Get expenses for selected month
+    const monthlyExpenses = expenseList.getMonthlyExpenses(month, year);
+    
+    // Calculate totals
+    const totalSpent = monthlyExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+    const days = new Set(monthlyExpenses.map(exp => exp.date.toISOString().split('T')[0]));
     const avgSpending = days.size > 0 ? totalSpent / days.size : 0;
-
-    const remainingBudget = Object.entries(budgetsByCategory).reduce((remaining, [category, budget]) => {
-        const spent = expenses
+    
+    // Calculate remaining budget
+    let totalBudget = 0;
+    let remainingBudget = 0;
+    Object.entries(budgets).forEach(([category, budget]) => {
+        totalBudget += budget;
+        const categorySpent = monthlyExpenses
             .filter(e => e.category === category)
             .reduce((sum, e) => sum + e.amount, 0);
-        return remaining + Math.max(0, budget - spent);
-    }, 0);
-
-    document.querySelector(".total-spent").textContent = `$${totalSpent.toFixed(2)}`;
-    document.querySelector(".average-spending").textContent = `$${avgSpending.toFixed(2)}`;
-    document.querySelector(".remaining-budget").textContent = `$${remainingBudget.toFixed(2)}`;
-
-    // ALERTS
-    const alerts = [];
-    Object.entries(budgetsByCategory).forEach(([category, budget]) => {
-        const spent = expenses
-            .filter(e => e.category === category)
-            .reduce((sum, e) => sum + e.amount, 0);
-        if (spent >= budget) {
-            alerts.push(`You have exceeded your ${category} budget!`);
-        } else if (spent >= budget * 0.9) {
-            alerts.push(`You're approaching your ${category} budget.`);
-        }
+        remainingBudget += Math.max(0, budget - categorySpent);
     });
-
-    const alertsList = document.querySelector("#alerts-list");
-    alertsList.innerHTML = "";
-    alerts.forEach(msg => {
-        const li = document.createElement("li");
-        li.textContent = msg;
-        alertsList.appendChild(li);
-    });
+    
+    // Update summary cards
+    document.querySelector('.total-spent').textContent = `${totalSpent.toFixed(2)}`;
+    document.querySelector('.average-spending').textContent = `${avgSpending.toFixed(2)}`;
+    document.querySelector('.remaining-budget').textContent = `${remainingBudget.toFixed(2)}`;
+    
+    // Update alerts
+    const alertsContainer = document.getElementById('alerts-container');
+    alertsContainer.innerHTML = '';
+    
+    // Only show alerts for current month
+    if (monthNavigator.isCurrentMonth()) {
+        Object.entries(budgets).forEach(([category, budget]) => {
+            if (budget > 0) {
+                const spent = monthlyExpenses
+                    .filter(e => e.category === category)
+                    .reduce((sum, e) => sum + e.amount, 0);
+                
+                if (spent >= budget) {
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-danger';
+                    alert.innerHTML = `🛑 You have exceeded your ${category} budget by ${(spent - budget).toFixed(2)}!`;
+                    alertsContainer.appendChild(alert);
+                } else if (spent >= budget * 0.9) {
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-warning';
+                    alert.innerHTML = `⚠️ You're approaching your ${category} budget (${Math.round((spent/budget) * 100)}% used)`;
+                    alertsContainer.appendChild(alert);
+                }
+            }
+        });
+    } else {
+        // Show informational message for past months
+        const info = document.createElement('div');
+        info.className = 'alert alert-info';
+        info.style.backgroundColor = '#dbeafe';
+        info.style.borderLeftColor = '#2563eb';
+        info.style.color = '#1e40af';
+        info.innerHTML = `📊 Viewing historical data for ${monthNavigator.monthDisplay.textContent}`;
+        alertsContainer.appendChild(info);
+    }
 }
-
-
-// Initial table rendering
-renderTable(expenseList.expenses)

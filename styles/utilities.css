@@ -1,0 +1,89 @@
+/* Table */
+.expenses-table {
+    width: 100%;
+    background: var(--surface);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.expenses-table thead {
+    background-color: var(--background);
+}
+
+.expenses-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.expenses-table td {
+    padding: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.expenses-table tbody tr {
+    transition: background-color 0.2s;
+}
+
+.expenses-table tbody tr:hover {
+    background-color: var(--background);
+}
+
+/* Table Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+
+.btn-icon:hover {
+    background-color: var(--background);
+}
+
+.btn-icon.edit {
+    color: var(--primary-color);
+}
+
+.btn-icon.delete {
+    color: var(--danger-color);
+}
+
+.export-section {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+
+/* Category Colors */
+.category-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.category-housing { background-color: #dbeafe; color: #1e40af; }
+.category-food { background-color: #fce7f3; color: #be185d; }
+.category-transportation { background-color: #e0e7ff; color: #4338ca; }
+.category-healthcare { background-color: #dcfce7; color: #15803d; }
+.category-education { background-color: #fef3c7; color: #a16207; }
+.category-personal { background-color: #f3e8ff; color: #7c3aed; }
+.category-entertainment { background-color: #fee2e2; color: #dc2626; }
+.category-family { background-color: #cffafe; color: #0891b2; }
+.category-finances { background-color: #d1fae5; color: #047857; }
+.category-donations { background-color: #fce7f3; color: #be185d; }
+.category-business { background-color: #e0e7ff; color: #4338ca; }
