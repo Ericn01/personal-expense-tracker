@@ -211,6 +211,7 @@
 
 .summary-grid {
     display: grid;
+    margin-top: 1rem;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1.5rem;
 }
@@ -251,19 +252,6 @@
     color: var(--text-secondary);
 }
 
-.charts-section {
-    background: var(--surface);
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: var(--shadow);
-}
-
-.charts-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 2rem;
-    grid-template-rows: auto auto;
-}
 
 .analysis-grid {
     display: grid;
@@ -347,6 +335,7 @@
     }
     
     .summary-grid {
+
         grid-template-columns: 1fr;
     }
     
