@@ -6,7 +6,6 @@
     <title>Financial Reports - Financial Dashboard</title>
     <link rel="stylesheet" href="styles/index.css">
     <script type="module" src="js/reports.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js"></script>
 </head>
 <body>
     <header>
@@ -85,63 +84,6 @@
                         <span class="summary-value" id="transaction-count">0</span>
                         <span class="summary-change" id="count-change">transactions</span>
                     </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Charts and Visualizations -->
-        <section class="charts-section">
-            <div class="charts-grid">
-                <!-- Monthly Trend Chart -->
-                <div class="chart-container large">
-                    <div class="chart-header">
-                        <h3>📈 Monthly Spending Trend</h3>
-                        <div class="chart-controls">
-                            <select id="trend-type">
-                                <option value="total">Total Amount</option>
-                                <option value="count">Transaction Count</option>
-                                <option value="average">Daily Average</option>
-                            </select>
-                        </div>
-                    </div>
-                    <canvas id="monthlyTrendChart"></canvas>
-                </div>
-
-                <!-- Category Breakdown -->
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3>🍰 Category Breakdown</h3>
-                        <div class="chart-controls">
-                            <select id="category-period">
-                                <option value="current">Current Period</option>
-                                <option value="previous">Previous Period</option>
-                                <option value="comparison">Comparison</option>
-                            </select>
-                        </div>
-                    </div>
-                    <canvas id="categoryBreakdownChart"></canvas>
-                </div>
-
-                <!-- Weekly Pattern -->
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3>📅 Weekly Spending Pattern</h3>
-                        <div class="chart-controls">
-                            <span class="chart-info">Average by day of week</span>
-                        </div>
-                    </div>
-                    <canvas id="weeklyPatternChart"></canvas>
-                </div>
-
-                <!-- Budget vs Actual -->
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3>🎯 Budget vs Actual</h3>
-                        <div class="chart-controls">
-                            <button class="chart-toggle" data-chart="budget">Show Variance</button>
-                        </div>
-                    </div>
-                    <canvas id="budgetComparisonChart"></canvas>
                 </div>
             </div>
         </section>

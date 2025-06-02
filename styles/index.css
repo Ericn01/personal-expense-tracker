@@ -2,4 +2,10 @@
 @import './layout.css';
 @import './components.css';
 @import './utilities.css';
-@import './nav.css';
+
+
+/*Individual pages CSS*/
+@import './pages/budgets.css';
+@import './pages/dashboard.css';
+@import './pages/expenses.css';
+@import './pages/reports.css'

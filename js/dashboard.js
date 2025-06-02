@@ -376,7 +376,7 @@ function initializeSpendingTrendChart() {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
             plugins: {
                 legend: { 
                     display: false 
@@ -439,7 +439,7 @@ function initializeCategoryChart() {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
             plugins: {
                 legend: { 
                     position: 'bottom',
@@ -493,7 +493,7 @@ function initializeWeeklyChart() {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
             plugins: {
                 legend: { 
                     display: false 
@@ -546,11 +546,11 @@ function updateCharts(stats) {
 function updateSpendingTrendChart() {
     if (!spendingChart) return;
     
-    // Get last 6 months of data
+    // Get last 4 months of data
     const monthlyData = [];
     const labels = [];
     
-    for (let i = 5; i >= 0; i--) {
+    for (let i = 3; i >= 0; i--) {
         const date = new Date();
         date.setMonth(date.getMonth() - i);
         const month = date.getMonth();
@@ -680,243 +680,3 @@ window.showSettings = function() {
     alert('Settings panel coming soon!');
 };
 
-// Enhanced CSS for dashboard improvements
-const dashboardStyles = `
-.activity-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--border-color);
-    transition: background-color 0.2s;
-}
-
-.activity-item:hover {
-    background-color: var(--background);
-    margin: 0 -1rem;
-    padding: 1rem;
-    border-radius: 6px;
-}
-
-.activity-item:last-child {
-    border-bottom: none;
-}
-
-.activity-info {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex: 1;
-}
-
-.activity-description {
-    color: var(--text-primary);
-    font-weight: 500;
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.activity-details {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.25rem;
-}
-
-.activity-amount {
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.activity-date {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-}
-
-.budget-progress-item {
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: var(--background);
-    border-radius: 8px;
-    transition: transform 0.2s;
-}
-
-.budget-progress-item:hover {
-    transform: translateY(-1px);
-}
-
-.progress-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.75rem;
-}
-
-.progress-category {
-    font-weight: 600;
-    color: var(--text-primary);
-    text-transform: capitalize;
-}
-
-.progress-amount {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-}
-
-.progress-bar {
-    width: 100%;
-    height: 8px;
-    background-color: var(--border-color);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 0.75rem;
-}
-
-.progress-fill {
-    height: 100%;
-    transition: width 0.3s ease;
-}
-
-.progress-fill.normal {
-    background-color: var(--success-color);
-}
-
-.progress-fill.warning {
-    background-color: var(--warning-color);
-}
-
-.progress-fill.over-budget {
-    background-color: var(--danger-color);
-}
-
-.progress-footer {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-}
-
-.empty-state-small {
-    text-align: center;
-    padding: 2rem;
-    color: var(--text-secondary);
-}
-
-.empty-state-small a {
-    color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.empty-state-small a:hover {
-    text-decoration: underline;
-}
-
-.alert-icon {
-    margin-right: 0.75rem;
-    font-size: 1.1rem;
-}
-
-.trend.negative {
-    color: var(--danger-color);
-}
-
-.trend.warning {
-    color: var(--warning-color);
-}
-
-.chart-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 300px;
-    color: var(--text-secondary);
-    background: var(--background);
-    border-radius: 8px;
-}
-
-.placeholder-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
-}
-
-.chart-placeholder p {
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-}
-
-.chart-placeholder small {
-    opacity: 0.7;
-}
-
-.dashboard-error {
-    text-align: center;
-    padding: 4rem 2rem;
-}
-
-.dashboard-error h2 {
-    margin-bottom: 1rem;
-    color: var(--text-primary);
-}
-
-.dashboard-error p {
-    margin-bottom: 2rem;
-    color: var(--text-secondary);
-}
-
-.error-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-}
-
-.error-actions .btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: 500;
-    cursor: pointer;
-    border: none;
-}
-
-.btn-primary {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.btn-secondary {
-    background-color: var(--border-color);
-    color: var(--text-primary);
-}
-
-@media (max-width: 768px) {
-    .activity-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
-    
-    .activity-details {
-        align-items: flex-start;
-        flex-direction: row;
-        justify-content: space-between;
-        width: 100%;
-    }
-    
-    .progress-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
-}
-`;
-
-// Inject the enhanced styles
-const styleElement = document.createElement('style');
-styleElement.textContent = dashboardStyles;
-document.head.appendChild(styleElement);
