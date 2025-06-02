@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Management - Financial Dashboard</title>
+    <link rel="stylesheet" href="styles/index.css">
+    <script type="module" src="js/expenses.js"></script>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>💳 Expense Management</h1>
+            <nav class="main-nav">
+                <a href="index.html" class="nav-link">📊 Dashboard</a>
+                <a href="expenses.html" class="nav-link active">💳 Expenses</a>
+                <a href="budgets.html" class="nav-link">📈 Budgets</a>
+                <a href="reports.html" class="nav-link">📋 Reports</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="expenses-layout">
+        <!-- Add New Expense Form -->
+        <aside class="expense-form-sidebar">
+            <div class="card">
+                <form class="new-entry-form" id="new-entry-form">
+                    <h3 class="form-heading">
+                        <span class="new-expense-heading">💰 Add New Expense</span>
+                        <button type="button" class="close-form-btn" id="close-form" style="display: none;">✕</button>
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="amount">💵 Amount ($)</label>
+                        <input id="amount" name="amount" type="number" step="0.01" min="0" max="100000" placeholder="0.00" required/>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="categories">🏷️ Category</label>
+                        <select name="categories" id="categories" required>
+                            <option value="">Select a category</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="date">📅 Date</label>
+                        <input type="date" name="date" id="date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">📝 Description</label>
+                        <input type="text" name="description" id="description" placeholder="e.g., Grocery shopping at Walmart" required/>
+                    </div>
+                    
+                    <button class="submit-button" type="submit">
+                        <span class="btn-text">Add Expense</span>
+                        <span class="btn-icon">+</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="card quick-stats">
+                <h3>📊 Today's Summary</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Today's Spending:</span>
+                    <span class="stat-value" id="today-spending">$0.00</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">This Week:</span>
+                    <span class="stat-value" id="week-spending">$0.00</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">This Month:</span>
+                    <span class="stat-value" id="month-spending">$0.00</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Expenses Management -->
+        <div class="expenses-content">
+            <!-- Search and Filter Section -->
+            <section class="filter-section">
+                <div class="search-filter-header">
+                    <h2>🔍 Find & Filter Expenses</h2>
+                    <button class="toggle-filters-btn" id="toggle-filters">
+                        <span>Filters</span>
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5v-2z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="search-bar">
+                    <input type="text" id="expense-search" placeholder="🔎 Search expenses by description..." />
+                </div>
+
+                <div class="filter-panel" id="filter-panel" style="display: none;">
+                    <div class="filter-group">
+                        <div class="filter-item">
+                            <label for="start-date">From Date</label>
+                            <input type="date" id="start-date">
+                        </div>
+                        <div class="filter-item">
+                            <label for="end-date">To Date</label>
+                            <input type="date" id="end-date">
+                        </div>
+                        <div class="filter-item">
+                            <label for="filter-category">Category</label>
+                            <select id="filter-category">
+                                <option value="">All Categories</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label for="min-amount">Min Amount ($)</label>
+                            <input type="number" id="min-amount" placeholder="0" step="0.01">
+                        </div>
+                        <div class="filter-item">
+                            <label for="max-amount">Max Amount ($)</label>
+                            <input type="number" id="max-amount" placeholder="1000" step="0.01">
+                        </div>
+                    </div>
+                    <div class="filter-buttons">
+                        <button class="btn btn-primary" id="apply-filters">Apply Filters</button>
+                        <button class="btn btn-secondary" id="clear-filters">Clear All</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Expenses Table -->
+            <section class="table-section">
+                <div class="table-header">
+                    <h2>📋 Expense History</h2>
+                    <div class="table-actions">
+                        <select id="sort-by" class="sort-select">
+                            <option value="date-desc">Latest First</option>
+                            <option value="date-asc">Oldest First</option>
+                            <option value="amount-desc">Highest Amount</option>
+                            <option value="amount-asc">Lowest Amount</option>
+                            <option value="category">By Category</option>
+                        </select>
+                        <button class="btn btn-secondary" id="bulk-delete" style="display: none;">
+                            🗑️ Delete Selected
+                        </button>
+                        <button class="btn-export" onclick="exportExpenses()">
+                            📥 Export CSV
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="expenses-table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input type="checkbox" id="select-all" title="Select All">
+                                </th>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expenses-tbody">
+                            <!-- Expenses will be populated here -->
+                        </tbody>
+                    </table>
+                    
+                    <div class="table-footer">
+                        <div class="results-info">
+                            <span id="results-count">Showing 0 expenses</span>
+                        </div>
+                        <div class="pagination" id="pagination">
+                            <!-- Pagination will be added here if needed -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state" id="empty-state" style="display: none;">
+                    <div class="empty-icon">📝</div>
+                    <h3>No expenses found</h3>
+                    <p>Start by adding your first expense using the form on the left.</p>
+                    <button class="btn btn-primary" onclick="focusForm()">Add First Expense</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="delete-modal" style="display: none;">
+        <div class="modal-content">
+            <h3>🗑️ Confirm Deletion</h3>
+            <p>Are you sure you want to delete this expense? This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-danger" id="confirm-delete">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-stats">
+                <span>Total Expenses: <strong id="total-expenses-count">0</strong></span>
+                <span>Total Amount: <strong id="total-expenses-amount">$0.00</strong></span>
+            </div>
+            <div class="footer-links">
+                <a href="index.html">← Back to Dashboard</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

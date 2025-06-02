@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Reports - Financial Dashboard</title>
+    <link rel="stylesheet" href="styles/index.css">
+    <script type="module" src="js/reports.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js"></script>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>📋 Financial Reports</h1>
+            <nav class="main-nav">
+                <a href="index.html" class="nav-link">📊 Dashboard</a>
+                <a href="expenses.html" class="nav-link">💳 Expenses</a>
+                <a href="budgets.html" class="nav-link">📈 Budgets</a>
+                <a href="reports.html" class="nav-link active">📋 Reports</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="reports-layout">
+        <!-- Report Controls -->
+        <section class="report-controls">
+            <div class="date-range-selector">
+                <h2>📅 Report Period</h2>
+                <div class="date-inputs">
+                    <div class="date-group">
+                        <label for="report-start">From:</label>
+                        <input type="date" id="report-start">
+                    </div>
+                    <div class="date-group">
+                        <label for="report-end">To:</label>
+                        <input type="date" id="report-end">
+                    </div>
+                    <button class="btn btn-primary" id="generate-report">Generate Report</button>
+                </div>
+            </div>
+
+            <div class="quick-periods">
+                <button class="period-btn" data-period="week">This Week</button>
+                <button class="period-btn" data-period="month">This Month</button>
+                <button class="period-btn" data-period="quarter">This Quarter</button>
+                <button class="period-btn active" data-period="year">This Year</button>
+            </div>
+        </section>
+
+        <!-- Summary Statistics -->
+        <section class="report-summary">
+            <h2>📊 Summary Statistics</h2>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-icon">💰</div>
+                    <div class="summary-details">
+                        <h3>Total Expenses</h3>
+                        <span class="summary-value" id="total-expenses">$0.00</span>
+                        <span class="summary-change" id="expenses-change">+0% vs previous period</span>
+                    </div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-icon">📈</div>
+                    <div class="summary-details">
+                        <h3>Average Monthly</h3>
+                        <span class="summary-value" id="avg-monthly">$0.00</span>
+                        <span class="summary-change" id="monthly-change">+0% vs last period</span>
+                    </div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-icon">🏆</div>
+                    <div class="summary-details">
+                        <h3>Highest Category</h3>
+                        <span class="summary-value" id="highest-category">None</span>
+                        <span class="summary-change" id="highest-amount">$0.00</span>
+                    </div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-icon">📅</div>
+                    <div class="summary-details">
+                        <h3>Transaction Count</h3>
+                        <span class="summary-value" id="transaction-count">0</span>
+                        <span class="summary-change" id="count-change">transactions</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts and Visualizations -->
+        <section class="charts-section">
+            <div class="charts-grid">
+                <!-- Monthly Trend Chart -->
+                <div class="chart-container large">
+                    <div class="chart-header">
+                        <h3>📈 Monthly Spending Trend</h3>
+                        <div class="chart-controls">
+                            <select id="trend-type">
+                                <option value="total">Total Amount</option>
+                                <option value="count">Transaction Count</option>
+                                <option value="average">Daily Average</option>
+                            </select>
+                        </div>
+                    </div>
+                    <canvas id="monthlyTrendChart"></canvas>
+                </div>
+
+                <!-- Category Breakdown -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>🍰 Category Breakdown</h3>
+                        <div class="chart-controls">
+                            <select id="category-period">
+                                <option value="current">Current Period</option>
+                                <option value="previous">Previous Period</option>
+                                <option value="comparison">Comparison</option>
+                            </select>
+                        </div>
+                    </div>
+                    <canvas id="categoryBreakdownChart"></canvas>
+                </div>
+
+                <!-- Weekly Pattern -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>📅 Weekly Spending Pattern</h3>
+                        <div class="chart-controls">
+                            <span class="chart-info">Average by day of week</span>
+                        </div>
+                    </div>
+                    <canvas id="weeklyPatternChart"></canvas>
+                </div>
+
+                <!-- Budget vs Actual -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>🎯 Budget vs Actual</h3>
+                        <div class="chart-controls">
+                            <button class="chart-toggle" data-chart="budget">Show Variance</button>
+                        </div>
+                    </div>
+                    <canvas id="budgetComparisonChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Detailed Analysis -->
+        <section class="detailed-analysis">
+            <div class="analysis-grid">
+                <!-- Top Categories Table -->
+                <div class="analysis-card">
+                    <h3>🏆 Top Spending Categories</h3>
+                    <div class="table-container small">
+                        <table class="analysis-table">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th>% of Total</th>
+                                    <th>Transactions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="top-categories-table">
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Monthly Comparison -->
+                <div class="analysis-card">
+                    <h3>📊 Monthly Comparison</h3>
+                    <div class="comparison-container" id="monthly-comparison">
+                        <!-- Monthly comparison data -->
+                    </div>
+                </div>
+
+                <!-- Spending Insights -->
+                <div class="analysis-card">
+                    <h3>💡 Spending Insights</h3>
+                    <div class="insights-list" id="spending-insights">
+                        <!-- AI-generated insights -->
+                    </div>
+                </div>
+
+                <!-- Budget Performance -->
+                <div class="analysis-card">
+                    <h3>🎯 Budget Performance</h3>
+                    <div class="budget-performance" id="budget-performance">
+                        <!-- Budget performance metrics -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Export Options -->
+        <section class="export-section">
+            <h2>📥 Export Options</h2>
+            <div class="export-options">
+                <button class="export-btn" onclick="exportReport('pdf')">
+                    <span class="export-icon">📄</span>
+                    <span>Export PDF Report</span>
+                </button>
+                <button class="export-btn" onclick="exportReport('csv')">
+                    <span class="export-icon">📊</span>
+                    <span>Export CSV Data</span>
+                </button>
+                <button class="export-btn" onclick="exportReport('excel')">
+                    <span class="export-icon">📈</span>
+                    <span>Export Excel File</span>
+                </button>
+                <button class="export-btn" onclick="shareReport()">
+                    <span class="export-icon">🔗</span>
+                    <span>Share Report Link</span>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-stats">
+                <span>Report Generated: <strong id="report-generated">Now</strong></span>
+                <span>Data Points: <strong id="data-points">0</strong></span>
+            </div>
+            <div class="footer-links">
+                <a href="index.html">← Back to Dashboard</a>
+                <a href="budgets.html">Manage Budgets →</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

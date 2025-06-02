@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Management - Financial Dashboard</title>
+    <link rel="stylesheet" href="styles/index.css">
+    <script type="module" src="js/budgets.js"></script>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>📈 Budget Management</h1>
+            <nav class="main-nav">
+                <a href="index.html" class="nav-link">📊 Dashboard</a>
+                <a href="expenses.html" class="nav-link">💳 Expenses</a>
+                <a href="budgets.html" class="nav-link active">📈 Budgets</a>
+                <a href="reports.html" class="nav-link">📋 Reports</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="budgets-layout">
+        <!-- Budget Overview Cards -->
+        <section class="budget-overview-cards">
+            <div class="overview-card total">
+                <div class="card-header">
+                    <h3>💰 Total Monthly Budget</h3>
+                    <span class="trend-indicator" id="budget-trend">📈</span>
+                </div>
+                <div class="card-value">
+                    <span class="amount" id="total-budget">$0.00</span>
+                    <span class="vs-spending">vs $<span id="total-spent-comparison">0.00</span> spent</span>
+                </div>
+            </div>
+
+            <div class="overview-card remaining">
+                <div class="card-header">
+                    <h3>💳 Remaining Budget</h3>
+                    <span class="trend-indicator positive">✅</span>
+                </div>
+                <div class="card-value">
+                    <span class="amount remaining-amount" id="remaining-budget">$0.00</span>
+                    <span class="percentage" id="remaining-percentage">0% remaining</span>
+                </div>
+            </div>
+
+            <div class="overview-card categories">
+                <div class="card-header">
+                    <h3>📊 Categories Set</h3>
+                    <span class="trend-indicator">🎯</span>
+                </div>
+                <div class="card-value">
+                    <span class="amount" id="active-categories">0</span>
+                    <span class="vs-spending">of 11 categories</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Month Selection -->
+        <section class="month-selector">
+            <h2>📅 Budget for</h2>
+            <div class="month-navigation">
+                <button class="month-nav-btn" id="prev-month">‹</button>
+                <h3 class="current-month-display" id="current-month-display">May 2025</h3>
+                <button class="month-nav-btn" id="next-month">›</button>
+            </div>
+        </section>
+
+        <!-- Budget Categories Management -->
+        <section class="budget-categories">
+            <div class="section-header">
+                <h2>🏷️ Category Budgets</h2>
+                <div class="budget-actions">
+                    <button class="btn btn-secondary" id="reset-all-btn">🔄 Reset All</button>
+                    <button class="btn btn-primary" id="save-budgets-btn">💾 Save Changes</button>
+                </div>
+            </div>
+
+            <div class="budget-grid" id="budget-grid">
+                <!-- Budget items will be dynamically generated -->
+            </div>
+        </section>
+
+        <!-- Budget Templates -->
+        <section class="budget-templates">
+            <h2>📋 Quick Templates</h2>
+            <div class="template-cards">
+                <div class="template-card" data-template="conservative">
+                    <h3>💡 Conservative</h3>
+                    <p>Perfect for saving-focused budgets</p>
+                    <div class="template-preview">
+                        <span>Housing: $1200</span>
+                        <span>Food: $400</span>
+                        <span>Transport: $200</span>
+                    </div>
+                    <button class="btn btn-outline">Apply Template</button>
+                </div>
+
+                <div class="template-card" data-template="balanced">
+                    <h3>⚖️ Balanced</h3>
+                    <p>Healthy mix of spending and saving</p>
+                    <div class="template-preview">
+                        <span>Housing: $1500</span>
+                        <span>Food: $600</span>
+                        <span>Transport: $300</span>
+                    </div>
+                    <button class="btn btn-outline">Apply Template</button>
+                </div>
+
+                <div class="template-card" data-template="flexible">
+                    <h3>🎯 Flexible</h3>
+                    <p>Higher limits for lifestyle spending</p>
+                    <div class="template-preview">
+                        <span>Housing: $1800</span>
+                        <span>Food: $800</span>
+                        <span>Entertainment: $400</span>
+                    </div>
+                    <button class="btn btn-outline">Apply Template</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Budget Progress Visualization -->
+        <section class="budget-progress">
+            <h2>📊 Budget Progress This Month</h2>
+            <div class="progress-container" id="budget-progress-container">
+                <!-- Progress bars will be generated here -->
+            </div>
+        </section>
+
+        <!-- Budget Alerts & Recommendations -->
+        <section class="budget-insights">
+            <h2>💡 Smart Insights</h2>
+            <div class="insights-grid">
+                <div class="insight-card recommendations">
+                    <h3>🎯 Recommendations</h3>
+                    <div class="insight-content" id="recommendations">
+                        <p>Set up your first budget to get personalized recommendations!</p>
+                    </div>
+                </div>
+
+                <div class="insight-card alerts">
+                    <h3>🚨 Budget Alerts</h3>
+                    <div class="insight-content" id="budget-alerts">
+                        <p>No alerts at the moment. You're doing great!</p>
+                    </div>
+                </div>
+
+                <div class="insight-card trends">
+                    <h3>📈 Spending Trends</h3>
+                    <div class="insight-content" id="spending-trends">
+                        <p>Add some expenses to see spending trends.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Status Message -->
+    <div class="status-message" id="status-message"></div>
+
+    <!-- Template Confirmation Modal -->
+    <div class="modal" id="template-modal" style="display: none;">
+        <div class="modal-content">
+            <h3>📋 Apply Budget Template</h3>
+            <p>This will replace your current budget settings. Are you sure you want to continue?</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary">Cancel</button>
+                <button class="btn btn-primary" id="confirm-template">Apply Template</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-stats">
+                <span>Last Updated: <strong id="last-updated">Never</strong></span>
+            </div>
+            <div class="footer-links">
+                <a href="index.html">← Back to Dashboard</a>
+                <a href="reports.html">View Reports →</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

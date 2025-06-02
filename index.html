@@ -3,171 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Expense Tracker</title>
+    <title>Financial Dashboard - Overview</title>
     <link rel="stylesheet" href="styles/index.css">
-    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/dashboard.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js"></script>
 </head>
 <body>
     <header>
-        <h1> Personal Expense Tracker </h1>
+        <div class="header-content">
+            <h1>💰 Financial Dashboard</h1>
+            <nav class="main-nav">
+                <a href="index.html" class="nav-link active">📊 Dashboard</a>
+                <a href="expenses.html" class="nav-link">💳 Expenses</a>
+                <a href="budgets.html" class="nav-link">📈 Budgets</a>
+                <a href="reports.html" class="nav-link">📋 Reports</a>
+            </nav>
+        </div>
     </header>
-    <main class="dashboard-layout">
-        <!-- Sidebar: Add an expense-->
-            <aside class="add-entry">
-                <div class="card">
-                    <form class="new-entry-form" id="new-entry-form">
-                        <h3 class="new-expense-heading">Add a New Expense</h3>
-                        
-                        <div class="form-group">
-                            <label for="amount">Amount ($)</label>
-                            <input id="amount" name="amount" type="number" step="0.01" min="0" max="100000" placeholder="82.00" required/>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="categories">Category</label>
-                            <select name="categories" id="categories" required>
-                                <option value="">Select a category</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="date">Date</label>
-                            <input type="date" name="date" id="date" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="description">Description</label>
-                            <input type="text" name="description" id="description" placeholder="e.g., Grocery shopping" required/>
-                        </div>
-                        
-                        <button class="submit-button" type="submit">Add Expense</button>
-                    </form>
-                </div>
-                <!-- Budget Management -->
-                <div class="card budget-section">
-                    <h3>Monthly Budgets</h3>
-                    <div id="budget-list" class="budget-grid"></div>
-                    <div class="total-budget">
-                        <div class="total-label">Total Monthly Budget</div>
-                        <div class="total-amount" id="total-budget">$0.00</div>
-                    </div>
-                    
-                    <div class="actions">
-                        <button class="btn btn-secondary" id="reset-btn">Reset All</button>
-                        <button class="btn btn-primary" id="save-btn">Save Changes</button>
-                    </div>
-                    
-                    <div id="status-message" class="status-message"></div>
-                </div>
-            </aside>
-            <!-- Main Section -->
-            <section class="main-content">
-                <!-- Month Navigation -->
-                <div class="month-navigation">
-                    <button class="month-nav-btn" id="prev-month">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                    <h2 class="current-month-display" id="current-month-display">May 2025</h2>
-                    <button class="month-nav-btn" id="next-month">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                </div>
-                <!-- Summary + Alerts placeholder-->
-                <section class="summary-alerts-container">
-                            <div class="summary-cards">
-                        <div class="summary-card">
-                            <h4>Total Spent (This Month)</h4>
-                            <p class="total-spent">$0.00</p>
-                        </div>
-                        <div class="summary-card success">
-                            <h4>Remaining Budget</h4>
-                            <p class="remaining-budget">$0.00</p>
-                        </div>
-                        <div class="summary-card">
-                            <h4>Average Daily Spending</h4>
-                            <p class="average-spending">$0.00</p>
-                        </div>
-                    </div>
-                    <div class="alerts" id="alerts-container">
-                        <h4> Alerts </h4>
-                        <ul id="alerts-list">
-                            <!-- Display spending alerts here -->
-                        </ul>
-                    </div>
-                </section>
 
-                <div class="charts-container">
-                    <div class="chart-card">
-                        <h3>Monthly Spending Trend</h3>
-                        <canvas id="monthlyChart"></canvas>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Spending by Category</h3>
-                        <canvas id="categoryChart"></canvas>
+    <main class="dashboard-main">
+        <!-- Quick Actions Panel -->
+        <section class="quick-actions">
+            <h2>Quick Actions</h2>
+            <div class="action-cards">
+                <a href="expenses.html" class="action-card">
+                    <div class="action-icon">💳</div>
+                    <h3>Add Expense</h3>
+                    <p>Record a new transaction</p>
+                </a>
+                <a href="budgets.html" class="action-card">
+                    <div class="action-icon">📈</div>
+                    <h3>Manage Budgets</h3>
+                    <p>Set spending limits</p>
+                </a>
+                <a href="reports.html" class="action-card">
+                    <div class="action-icon">📋</div>
+                    <h3>View Reports</h3>
+                    <p>Analyze spending patterns</p>
+                </a>
+            </div>
+        </section>
+
+        <!-- Month Navigation -->
+        <section class="month-navigation">
+            <button class="month-nav-btn" id="prev-month">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+                </svg>
+            </button>
+            <h2 class="current-month-display" id="current-month-display">May 2025</h2>
+            <button class="month-nav-btn" id="next-month">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </section>
+
+        <!-- Financial Overview Cards -->
+        <section class="financial-overview">
+            <div class="overview-cards">
+                <div class="overview-card primary">
+                    <div class="card-icon">💰</div>
+                    <div class="card-content">
+                        <h3>Total Spent</h3>
+                        <p class="amount total-spent">$0.00</p>
+                        <span class="trend" id="spending-trend">↗️ +5.2% from last month</span>
                     </div>
                 </div>
-            </section>
-            <!--Filters + table -->
-            <div class="filter-panel">
-                <h3>Filter Expenses</h3>
-                <div class="filter-group">
-                    <div class="filter-item">
-                        <label for="start-date">Start Date</label>
-                        <input type="date" id="start-date">
-                    </div>
-                    <div class="filter-item">
-                        <label for="end-date">End Date</label>
-                        <input type="date" id="end-date">
-                    </div>
-                    <div class="filter-item">
-                        <label for="filter-category">Category</label>
-                        <select id="filter-category">
-                            <option value="">All Categories</option>
-                        </select>
-                    </div>
-                    <div class="filter-item">
-                        <label for="min-amount">Min Amount ($)</label>
-                        <input type="number" id="min-amount" placeholder="0">
-                    </div>
-                    <div class="filter-item">
-                        <label for="max-amount">Max Amount ($)</label>
-                        <input type="number" id="max-amount" placeholder="1000">
+                
+                <div class="overview-card success">
+                    <div class="card-icon">💳</div>
+                    <div class="card-content">
+                        <h3>Remaining Budget</h3>
+                        <p class="amount remaining-budget">$0.00</p>
+                        <span class="trend positive" id="budget-trend">🎯 68% remaining</span>
                     </div>
                 </div>
-                <div class="filter-buttons">
-                    <button class="btn btn-primary" id="apply-filters">Apply Filters</button>
-                    <button class="btn btn-secondary" id="clear-filters">Clear Filters</button>
+                
+                <div class="overview-card warning">
+                    <div class="card-icon">📊</div>
+                    <div class="card-content">
+                        <h3>Daily Average</h3>
+                        <p class="amount average-spending">$0.00</p>
+                        <span class="trend" id="daily-trend">📈 Track your habits</span>
+                    </div>
+                </div>
+                
+                <div class="overview-card info">
+                    <div class="card-icon">🎯</div>
+                    <div class="card-content">
+                        <h3>Monthly Goal</h3>
+                        <p class="amount monthly-goal">$0.00</p>
+                        <span class="trend" id="goal-progress">🚀 On track</span>
+                    </div>
                 </div>
             </div>
+        </section>
 
-            <section class="table-section">
-                <table class="expenses-table">
-                    <thead>
-                        <tr>
-                            <th> Date </th>
-                            <th> Category </th>
-                            <th> Amount ($) </th>
-                            <th> Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Will be populated using JS -->
-                    </tbody>
-                </table>
-            </section>
-
-            <!-- Export Section -->
-            <div class="export-section">
-                <button class="btn-export">📥 Export to CSV</button>
+        <!-- Alerts and Notifications -->
+        <section class="alerts-section">
+            <h2>💡 Smart Insights</h2>
+            <div class="alerts-container" id="alerts-container">
+                <!-- Dynamic alerts will be inserted here -->
             </div>
+        </section>
+
+        <!-- Charts and Analytics -->
+        <section class="analytics-section">
+            <div class="charts-grid">
+                <div class="chart-card large">
+                    <h3>📈 Spending Trends</h3>
+                    <canvas id="spendingTrendChart"></canvas>
+                </div>
+                
+                <div class="chart-card">
+                    <h3>🍰 Category Breakdown</h3>
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                
+                <div class="chart-card">
+                    <h3>📅 Weekly Pattern</h3>
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Activity Preview -->
+        <section class="recent-activity">
+            <div class="section-header">
+                <h2>⚡ Recent Activity</h2>
+                <a href="expenses.html" class="view-all-link">View All →</a>
+            </div>
+            <div class="activity-list" id="recent-expenses">
+                <!-- Recent expenses will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Budget Status Summary -->
+        <section class="budget-summary">
+            <h2>📊 Budget Status</h2>
+            <div class="budget-overview" id="budget-overview">
+                <!-- Budget progress bars will be generated here -->
+            </div>
+        </section>
     </main>
-    <footer>
 
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 Personal Finance Tracker</p>
+            <div class="footer-links">
+                <a href="#">Export Data</a>
+                <a href="#">Settings</a>
+            </div>
+        </div>
     </footer>
 </body>
 </html>

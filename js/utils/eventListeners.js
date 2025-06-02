@@ -1,13 +1,12 @@
 import { Expense } from "../models/Expense.js";
 import { renderTable } from "../ui/table.js";
-import { getEditingId, setEditingId } from "../main.js";
 
 // Helper function to get today's date string
 function getTodayDateString() {
     return new Date().toISOString().split('T')[0];
 }
 
-// New expense form submission
+// New expense form submission - simplified for backward compatibility
 export function handleFormSubmit(e, expenseList, updateAllCallback) {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -20,12 +19,18 @@ export function handleFormSubmit(e, expenseList, updateAllCallback) {
         date: data.date || getTodayDateString(),
     };
     
-    const currentEditingId = getEditingId();
+    // Check if we have access to editing state from main.js
+    let currentEditingId = null;
+    if (typeof window.getEditingId === 'function') {
+        currentEditingId = window.getEditingId();
+    }
     
     if (currentEditingId) {
         // Update existing expense
         expenseList.modifyExpense(currentEditingId, expenseData);
-        setEditingId(null);
+        if (typeof window.setEditingId === 'function') {
+            window.setEditingId(null);
+        }
         document.querySelector('.submit-button').textContent = 'Add Expense';
         document.querySelector('.new-expense-heading').textContent = 'Add a New Expense';
     } else {
@@ -36,7 +41,10 @@ export function handleFormSubmit(e, expenseList, updateAllCallback) {
     
     // Reset form and update display
     e.target.reset();
-    document.querySelector('#date').valueAsDate = new Date();
+    const dateInput = document.querySelector('#date');
+    if (dateInput) {
+        dateInput.valueAsDate = new Date();
+    }
     
     // Call the update function to refresh everything
     if (updateAllCallback) {
@@ -44,19 +52,21 @@ export function handleFormSubmit(e, expenseList, updateAllCallback) {
     }
 }
 
-// Filtering logic
+// Filtering logic - simplified
 export function applyFilters(expenseList, monthNavigator) {
+    if (!monthNavigator) return;
+    
     const { start, end } = monthNavigator.getDateRange();
     const filters = {
         startDate: start.toISOString(),
         endDate: end.toISOString(),
-        category: document.querySelector("#filter-category").value,
-        minAmount: document.querySelector("#min-amount").value || null,
-        maxAmount: document.querySelector("#max-amount").value || null
+        category: document.querySelector("#filter-category")?.value || "",
+        minAmount: document.querySelector("#min-amount")?.value || null,
+        maxAmount: document.querySelector("#max-amount")?.value || null
     };
     
-    const customStartDate = document.querySelector("#start-date").value;
-    const customEndDate = document.querySelector("#end-date").value;
+    const customStartDate = document.querySelector("#start-date")?.value;
+    const customEndDate = document.querySelector("#end-date")?.value;
     
     if (customStartDate) filters.startDate = customStartDate;
     if (customEndDate) filters.endDate = customEndDate;
@@ -65,81 +75,82 @@ export function applyFilters(expenseList, monthNavigator) {
     renderTable(filtered);
     
     // Re-attach event listeners after filtering
-    deleteExpense(expenseList);
-    modifyExpense(expenseList);
+    attachActionListeners(expenseList);
 }
 
-// Clear filters
+// Clear filters - simplified
 export function clearFilters(expenseList) {
-    document.querySelector('#start-date').value = '';
-    document.querySelector('#end-date').value = '';
-    document.querySelector('#filter-category').value = '';
-    document.querySelector('#min-amount').value = '';
-    document.querySelector('#max-amount').value = '';
-    
-    renderTable(expenseList.expenses);
-    
-    // Re-attach event listeners after clearing filters
-    deleteExpense(expenseList);
-    modifyExpense(expenseList);
-}
-
-// Delete expense functionality
-export function deleteExpense(expenseList) {
-    // Remove existing listeners to prevent duplicates
-    document.querySelectorAll(".delete-btn").forEach(btn => {
-        // Clone the button to remove all event listeners
-        const newBtn = btn.cloneNode(true);
-        btn.parentNode.replaceChild(newBtn, btn);
+    const filterInputs = ['#start-date', '#end-date', '#filter-category', '#min-amount', '#max-amount'];
+    filterInputs.forEach(selector => {
+        const element = document.querySelector(selector);
+        if (element) element.value = '';
     });
     
-    // Add event listeners for the delete buttons
+    renderTable(expenseList.expenses);
+    attachActionListeners(expenseList);
+}
+
+// Simplified action listeners
+function attachActionListeners(expenseList) {
+    // Remove existing listeners and attach new ones
     document.querySelectorAll(".delete-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            const id = btn.dataset.id;
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        
+        newBtn.addEventListener("click", () => {
+            const id = newBtn.dataset.id;
             if (confirm('Are you sure you want to delete this expense?')) {
                 expenseList.removeExpense(id);
                 renderTable(expenseList.expenses);
-                
-                // Re-attach event listeners after deletion
-                deleteExpense(expenseList);
-                modifyExpense(expenseList);
+                attachActionListeners(expenseList);
+            }
+        });
+    });
+    
+    document.querySelectorAll(".edit-btn").forEach(btn => {
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        
+        newBtn.addEventListener("click", () => {
+            const id = newBtn.dataset.id;
+            const expense = expenseList.expenses.find(expense => expense.id === id);
+            if (expense) {
+                populateFormForEdit(expense);
+                document.querySelector('.add-entry')?.scrollIntoView({ behavior: 'smooth' });
             }
         });
     });
 }
 
-// Edit expense functionality
+// Export simplified functions for backward compatibility
+export function deleteExpense(expenseList) {
+    attachActionListeners(expenseList);
+}
+
 export function modifyExpense(expenseList) {
-    // Remove existing listeners to prevent duplicates
-    document.querySelectorAll(".edit-btn").forEach(btn => {
-        // Clone the button to remove all event listeners
-        const newBtn = btn.cloneNode(true);
-        btn.parentNode.replaceChild(newBtn, btn);
-    });
-    
-    // Add event listeners for the edit buttons
-    document.querySelectorAll(".edit-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            const id = btn.dataset.id;
-            const expense = expenseList.expenses.find(expense => expense.id === id);
-            if (expense) {
-                populateFormForEdit(expense);
-                // Scroll to form
-                document.querySelector('.add-entry').scrollIntoView({ behavior: 'smooth' });
-            }
-        });
-    });
+    attachActionListeners(expenseList);
 }
 
 // Populate form for editing
 function populateFormForEdit(expense) {
-    document.querySelector("#amount").value = expense.amount;
-    document.querySelector("#categories").value = expense.category.toLowerCase();
-    document.querySelector("#date").value = new Date(expense.date).toISOString().split('T')[0];
-    document.querySelector("#description").value = expense.description;
+    const amountInput = document.querySelector("#amount");
+    const categorySelect = document.querySelector("#categories");
+    const dateInput = document.querySelector("#date");
+    const descriptionInput = document.querySelector("#description");
     
-    setEditingId(expense.id);
-    document.querySelector(".submit-button").textContent = "Update Expense";
-    document.querySelector(".new-expense-heading").textContent = "Edit Expense";
+    if (amountInput) amountInput.value = expense.amount;
+    if (categorySelect) categorySelect.value = expense.category.toLowerCase();
+    if (dateInput) dateInput.value = new Date(expense.date).toISOString().split('T')[0];
+    if (descriptionInput) descriptionInput.value = expense.description;
+    
+    // Update form state
+    if (typeof window.setEditingId === 'function') {
+        window.setEditingId(expense.id);
+    }
+    
+    const submitButton = document.querySelector(".submit-button");
+    const formHeading = document.querySelector(".new-expense-heading");
+    
+    if (submitButton) submitButton.textContent = "Update Expense";
+    if (formHeading) formHeading.textContent = "Edit Expense";
 }
