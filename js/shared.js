@@ -6,6 +6,7 @@ import { MonthNavigator } from "./models/MonthNavigator.js";
 // Global instances - shared across pages
 export const expenseList = new ExpenseList();
 
+
 // Factory functions for managers (only create when needed)
 export function initializeBudgetManager() {
     const budgetContainer = document.querySelector('#budget-list') || document.querySelector('#budget-grid');
@@ -66,29 +67,22 @@ export function showNotification(message, type = 'info', duration = 3000) {
 
 // Calculate spending statistics
 export function calculateSpendingStats(expenses, budgets = {}) {
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
-    
-    // Filter current month expenses
-    const monthlyExpenses = expenses.filter(expense => {
-        const expenseDate = new Date(expense.date);
-        return expenseDate.getMonth() === currentMonth && 
-                expenseDate.getFullYear() === currentYear;
-    });
+    // If expenses are already filtered, use them directly
+    const filteredExpenses = expenses || [];
     
     // Calculate totals
-    const totalSpent = monthlyExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+    const totalSpent = filteredExpenses.reduce((sum, exp) => sum + exp.amount, 0);
     const totalBudget = Object.values(budgets).reduce((sum, budget) => sum + budget, 0);
     const remainingBudget = Math.max(0, totalBudget - totalSpent);
     
-    // Calculate daily average
+    // Calculate daily average based on current date
+    const now = new Date();
     const currentDay = now.getDate();
     const avgDaily = currentDay > 0 ? totalSpent / currentDay : 0;
     
     // Get category breakdown
     const categoryTotals = {};
-    monthlyExpenses.forEach(expense => {
+    filteredExpenses.forEach(expense => {
         const category = expense.category.toLowerCase();
         categoryTotals[category] = (categoryTotals[category] || 0) + expense.amount;
     });
@@ -98,20 +92,26 @@ export function calculateSpendingStats(expenses, budgets = {}) {
         totalBudget,
         remainingBudget,
         avgDaily,
-        monthlyExpenses,
+        monthlyExpenses: filteredExpenses,
         categoryTotals,
-        transactionCount: monthlyExpenses.length
+        transactionCount: filteredExpenses.length
     };
 }
 
 // Generate budget alerts
 export function generateBudgetAlerts(expenses, budgets) {
     const alerts = [];
-    const stats = calculateSpendingStats(expenses, budgets);
+    
+    // Calculate category totals from the provided expenses
+    const categoryTotals = {};
+    expenses.forEach(expense => {
+        const category = expense.category.toLowerCase();
+        categoryTotals[category] = (categoryTotals[category] || 0) + expense.amount;
+    });
     
     Object.entries(budgets).forEach(([category, budget]) => {
         if (budget > 0) {
-            const spent = stats.categoryTotals[category.toLowerCase()] || 0;
+            const spent = categoryTotals[category.toLowerCase()] || 0;
             const percentage = (spent / budget) * 100;
             
             if (spent >= budget) {
@@ -191,7 +191,7 @@ export const CHART_COLORS = {
     ]
 };
 
-// Navigation helper (simplified)
+// Navigation helper
 export function setActiveNavItem() {
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     const navLinks = document.querySelectorAll('.nav-link');

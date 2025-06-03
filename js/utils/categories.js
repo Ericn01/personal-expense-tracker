@@ -1,4 +1,3 @@
-// categories.js - Simplified with reduced category set
 export const CATEGORIES = {
     housing: { name: 'Housing', icon: '🏠' },
     food: { name: 'Food & Dining', icon: '🍔' },

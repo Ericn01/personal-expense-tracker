@@ -16,6 +16,7 @@ let monthNavigator = null;
 let spendingChart = null;
 let categoryChart = null;
 let weeklyChart = null;
+let chartsInitialized = false;
 
 // Dashboard state
 let dashboardData = {
@@ -38,38 +39,66 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function initializeDashboard() {
-    // Initialize managers with error handling
+    // Initialize managers
     budgetManager = initializeBudgetManager();
     monthNavigator = initializeMonthNavigator(updateDashboard);
     
-    // Wait for DOM to be fully ready
-    await new Promise(resolve => {
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', resolve);
-        } else {
-            resolve();
-        }
-    });
-    
-    // Initialize charts with delay to ensure containers exist
-    setTimeout(() => {
+    // Initialize charts immediately if Chart.js is available
+    if (typeof Chart !== 'undefined') {
+        requestAnimationFrame(() => {
+            initializeCharts();
+        });
+    } else {
+        // Wait for Chart.js to load
+        await waitForChartJS();
         initializeCharts();
-    }, 500);
+    }
+}
+
+async function waitForChartJS() {
+    return new Promise((resolve) => {
+        const checkChart = () => {
+            if (typeof Chart !== 'undefined') {
+                resolve();
+            } else {
+                setTimeout(checkChart, 100);
+            }
+        };
+        checkChart();
+    });
 }
 
 function updateDashboard() {
     try {
-        // Get current data
-        const budgets = budgetManager ? budgetManager.getAllBudgets() : {};
-        const stats = calculateSpendingStats(expenseList.expenses, budgets);
+        // Get current month/year from navigator
+        const currentMonth = monthNavigator ? monthNavigator.getCurrentMonth() : new Date().getMonth();
+        const currentYear = monthNavigator ? monthNavigator.getCurrentYear() : new Date().getFullYear();
+        
+        // Filter expenses for current month
+        const monthlyExpenses = expenseList.expenses.filter(expense => {
+            const expenseDate = new Date(expense.date);
+            return expenseDate.getMonth() === currentMonth && 
+                   expenseDate.getFullYear() === currentYear;
+        });
+        
+        // Get budgets for current month
+        const budgets = budgetManager ? budgetManager.getBudgetsForMonth(currentMonth, currentYear) : {};
+        
+        // Ensure budget manager is set to current month
+        if (budgetManager) {
+            budgetManager.setCurrentMonth(currentMonth, currentYear);
+        }
+        
+        // Calculate stats with monthly expenses
+        const stats = calculateSpendingStats(monthlyExpenses, budgets);
         
         // Update dashboard data
         dashboardData = {
-            expenses: expenseList.expenses,
+            expenses: monthlyExpenses,
             budgets: budgets,
             stats: stats,
-            currentMonth: monthNavigator ? monthNavigator.getCurrentMonth() : new Date().getMonth(),
-            currentYear: monthNavigator ? monthNavigator.getCurrentYear() : new Date().getFullYear()
+            currentMonth: currentMonth,
+            currentYear: currentYear
         };
         
         // Update all dashboard sections
@@ -77,7 +106,11 @@ function updateDashboard() {
         updateAlerts(stats, budgets);
         updateRecentActivity();
         updateBudgetSummary(stats, budgets);
-        updateCharts(stats);
+        
+        // Update charts if initialized
+        if (chartsInitialized) {
+            updateCharts(stats);
+        }
         
     } catch (error) {
         console.error('Error updating dashboard:', error);
@@ -103,7 +136,7 @@ function updateOverviewCards(stats) {
         avgSpendingEl.textContent = formatCurrency(stats.avgDaily);
     }
     
-    // Monthly Goal
+    // Monthly Goal (Total Budget)
     const monthlyGoalEl = document.querySelector('.monthly-goal');
     if (monthlyGoalEl) {
         monthlyGoalEl.textContent = formatCurrency(stats.totalBudget);
@@ -114,14 +147,19 @@ function updateOverviewCards(stats) {
 }
 
 function updateTrends(stats) {
-    // Calculate previous month for comparison
-    const now = new Date();
-    const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const prevMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+    const { currentMonth, currentYear } = dashboardData;
+    
+    // Calculate previous month data
+    let prevMonth = currentMonth - 1;
+    let prevYear = currentYear;
+    if (prevMonth < 0) {
+        prevMonth = 11;
+        prevYear--;
+    }
     
     const prevMonthExpenses = expenseList.expenses.filter(expense => {
         const expenseDate = new Date(expense.date);
-        return expenseDate >= prevMonth && expenseDate <= prevMonthEnd;
+        return expenseDate.getMonth() === prevMonth && expenseDate.getFullYear() === prevYear;
     });
     
     const prevMonthTotal = prevMonthExpenses.reduce((sum, exp) => sum + exp.amount, 0);
@@ -147,7 +185,8 @@ function updateTrends(stats) {
     // Update daily trend
     const dailyTrendEl = document.getElementById('daily-trend');
     if (dailyTrendEl) {
-        const projectedMonthly = stats.avgDaily * 30;
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+        const projectedMonthly = stats.avgDaily * daysInMonth;
         const icon = projectedMonthly <= stats.totalBudget ? '😊' : '⚠️';
         dailyTrendEl.textContent = `${icon} ${formatCurrency(projectedMonthly)}/month projected`;
     }
@@ -180,7 +219,7 @@ function updateAlerts(stats, budgets) {
     
     alertsContainer.innerHTML = '';
     
-    const alerts = generateBudgetAlerts(expenseList.expenses, budgets);
+    const alerts = generateBudgetAlerts(dashboardData.expenses, budgets);
     
     if (alerts.length === 0) {
         const noAlerts = document.createElement('div');
@@ -253,6 +292,7 @@ function updateRecentActivity() {
     const recentContainer = document.getElementById('recent-expenses');
     if (!recentContainer) return;
     
+    // Get all expenses sorted by date, not just monthly
     const recentExpenses = expenseList.expenses
         .sort((a, b) => new Date(b.date) - new Date(a.date))
         .slice(0, 5);
@@ -296,7 +336,7 @@ function updateBudgetSummary(stats, budgets) {
     if (activeBudgets.length === 0) {
         budgetOverview.innerHTML = `
             <div class="empty-state-small">
-                <p>No budgets set yet. <a href="budgets.html">Create your first budget →</a></p>
+                <p>No budgets set for this month. <a href="budgets.html">Create your budget →</a></p>
             </div>
         `;
         return;
@@ -328,18 +368,32 @@ function updateBudgetSummary(stats, budgets) {
 }
 
 function initializeCharts() {
-    // Check if Chart.js is available
+    // Check if Chart.js is available and canvases exist
     if (typeof Chart === 'undefined') {
         console.warn('Chart.js not loaded. Charts will not be available.');
         showChartPlaceholders();
         return;
     }
     
-    // Initialize charts with proper error handling
+    const spendingCanvas = document.getElementById('spendingTrendChart');
+    const categoryCanvas = document.getElementById('categoryChart');
+    const weeklyCanvas = document.getElementById('weeklyChart');
+    
+    if (!spendingCanvas || !categoryCanvas || !weeklyCanvas) {
+        console.warn('Chart canvases not found in DOM');
+        return;
+    }
+    
+    // Initialize charts
     try {
         initializeSpendingTrendChart();
         initializeCategoryChart();
         initializeWeeklyChart();
+        chartsInitialized = true;
+        
+        // Update charts with current data
+        const stats = calculateSpendingStats(dashboardData.expenses, dashboardData.budgets);
+        updateCharts(stats);
     } catch (error) {
         console.error('Error initializing charts:', error);
         showChartPlaceholders();
@@ -348,10 +402,7 @@ function initializeCharts() {
 
 function initializeSpendingTrendChart() {
     const spendingCtx = document.getElementById('spendingTrendChart');
-    if (!spendingCtx) {
-        console.warn('Spending trend chart canvas not found');
-        return;
-    }
+    if (!spendingCtx) return;
     
     if (spendingChart) {
         spendingChart.destroy();
@@ -416,10 +467,7 @@ function initializeSpendingTrendChart() {
 
 function initializeCategoryChart() {
     const categoryCtx = document.getElementById('categoryChart');
-    if (!categoryCtx) {
-        console.warn('Category chart canvas not found');
-        return;
-    }
+    if (!categoryCtx) return;
     
     if (categoryChart) {
         categoryChart.destroy();
@@ -470,10 +518,7 @@ function initializeCategoryChart() {
 
 function initializeWeeklyChart() {
     const weeklyCtx = document.getElementById('weeklyChart');
-    if (!weeklyCtx) {
-        console.warn('Weekly chart canvas not found');
-        return;
-    }
+    if (!weeklyCtx) return;
     
     if (weeklyChart) {
         weeklyChart.destroy();
@@ -532,7 +577,7 @@ function initializeWeeklyChart() {
 }
 
 function updateCharts(stats) {
-    if (typeof Chart === 'undefined') return;
+    if (!chartsInitialized || typeof Chart === 'undefined') return;
     
     try {
         updateSpendingTrendChart();
@@ -549,12 +594,16 @@ function updateSpendingTrendChart() {
     // Get last 4 months of data
     const monthlyData = [];
     const labels = [];
+    const { currentMonth, currentYear } = dashboardData;
     
     for (let i = 3; i >= 0; i--) {
-        const date = new Date();
-        date.setMonth(date.getMonth() - i);
-        const month = date.getMonth();
-        const year = date.getFullYear();
+        let month = currentMonth - i;
+        let year = currentYear;
+        
+        if (month < 0) {
+            month += 12;
+            year--;
+        }
         
         const monthExpenses = expenseList.expenses.filter(expense => {
             const expenseDate = new Date(expense.date);
@@ -563,12 +612,14 @@ function updateSpendingTrendChart() {
         
         const total = monthExpenses.reduce((sum, exp) => sum + exp.amount, 0);
         monthlyData.push(total);
+        
+        const date = new Date(year, month);
         labels.push(date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }));
     }
     
     spendingChart.data.labels = labels;
     spendingChart.data.datasets[0].data = monthlyData;
-    spendingChart.update('none'); // Use 'none' for better performance
+    spendingChart.update('none');
 }
 
 function updateCategoryChart(stats) {
@@ -577,7 +628,7 @@ function updateCategoryChart(stats) {
     const categories = Object.entries(stats.categoryTotals)
         .filter(([, amount]) => amount > 0)
         .sort(([, a], [, b]) => b - a)
-        .slice(0, 5); // Limit to top 5 categories for better readability
+        .slice(0, 5);
     
     if (categories.length === 0) {
         categoryChart.data.labels = ['No data'];
@@ -595,13 +646,13 @@ function updateCategoryChart(stats) {
 function updateWeeklyChart() {
     if (!weeklyChart) return;
     
-    // Calculate average spending by day of week
+    // Calculate average spending by day of week for current month
     const weeklyTotals = new Array(7).fill(0);
     const weeklyCounts = new Array(7).fill(0);
     
-    expenseList.expenses.forEach(expense => {
+    dashboardData.expenses.forEach(expense => {
         const dayOfWeek = new Date(expense.date).getDay();
-        const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Adjust for Monday start
+        const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
         weeklyTotals[adjustedDay] += expense.amount;
         weeklyCounts[adjustedDay]++;
     });
@@ -656,7 +707,7 @@ function setupPeriodicUpdates() {
         }
     }, 30 * 1000);
     
-    // Update on window focus (in case data changed in another tab)
+    // Update on window focus
     window.addEventListener('focus', updateDashboard);
     
     // Update on resize to redraw charts
@@ -679,4 +730,3 @@ window.exportData = function() {
 window.showSettings = function() {
     alert('Settings panel coming soon!');
 };
-
