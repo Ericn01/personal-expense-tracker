@@ -1,50 +1,32 @@
-// shared.js - Common functionality across all pages
+// shared.js - Common functionality across all pages (Simplified)
 import { ExpenseList } from "./models/ExpenseList.js";
 import { BudgetManager } from "./models/BudgetManager.js";
 import { MonthNavigator } from "./models/MonthNavigator.js";
 
 // Global instances - shared across pages
 export const expenseList = new ExpenseList();
-export let budgetManager = null;
-export let monthNavigator = null;
 
-// Initialize budget manager if container exists
+// Factory functions for managers (only create when needed)
 export function initializeBudgetManager() {
     const budgetContainer = document.querySelector('#budget-list') || document.querySelector('#budget-grid');
     if (budgetContainer) {
-        budgetManager = new BudgetManager(budgetContainer);
-        return budgetManager;
+        return new BudgetManager(budgetContainer);
     }
     return null;
 }
 
-// Initialize month navigator if elements exist
 export function initializeMonthNavigator(updateCallback = null) {
     const prevBtn = document.getElementById('prev-month');
     const nextBtn = document.getElementById('next-month');
     const display = document.getElementById('current-month-display');
     
     if (prevBtn && nextBtn && display) {
-        monthNavigator = new MonthNavigator(expenseList, updateCallback);
-        return monthNavigator;
+        return new MonthNavigator(expenseList, updateCallback);
     }
     return null;
 }
 
-// Navigation helper
-export function setActiveNavItem() {
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    const navLinks = document.querySelectorAll('.nav-link');
-    
-    navLinks.forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('href') === currentPage) {
-            link.classList.add('active');
-        }
-    });
-}
-
-// Format currency
+// Utility functions
 export function formatCurrency(amount) {
     return new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -52,7 +34,6 @@ export function formatCurrency(amount) {
     }).format(amount);
 }
 
-// Format date
 export function formatDate(date) {
     return new Intl.DateTimeFormat('en-US', {
         year: 'numeric',
@@ -61,7 +42,6 @@ export function formatDate(date) {
     }).format(new Date(date));
 }
 
-// Show notification
 export function showNotification(message, type = 'info', duration = 3000) {
     // Remove existing notifications
     const existing = document.querySelector('.notification');
@@ -94,7 +74,7 @@ export function calculateSpendingStats(expenses, budgets = {}) {
     const monthlyExpenses = expenses.filter(expense => {
         const expenseDate = new Date(expense.date);
         return expenseDate.getMonth() === currentMonth && 
-               expenseDate.getFullYear() === currentYear;
+                expenseDate.getFullYear() === currentYear;
     });
     
     // Calculate totals
@@ -103,7 +83,6 @@ export function calculateSpendingStats(expenses, budgets = {}) {
     const remainingBudget = Math.max(0, totalBudget - totalSpent);
     
     // Calculate daily average
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const currentDay = now.getDate();
     const avgDaily = currentDay > 0 ? totalSpent / currentDay : 0;
     
@@ -198,55 +177,6 @@ export function debounce(func, wait) {
     };
 }
 
-// Local storage helpers
-export function saveToStorage(key, data) {
-    try {
-        localStorage.setItem(key, JSON.stringify(data));
-        return true;
-    } catch (error) {
-        console.error('Failed to save to storage:', error);
-        return false;
-    }
-}
-
-export function loadFromStorage(key, defaultValue = null) {
-    try {
-        const data = localStorage.getItem(key);
-        return data ? JSON.parse(data) : defaultValue;
-    } catch (error) {
-        console.error('Failed to load from storage:', error);
-        return defaultValue;
-    }
-}
-
-// Initialize common functionality
-export function initializeCommonFeatures() {
-    // Set active navigation
-    setActiveNavItem();
-    
-    // Initialize date inputs with current date
-    const dateInputs = document.querySelectorAll('input[type="date"]');
-    const today = new Date().toISOString().split('T')[0];
-    dateInputs.forEach(input => {
-        if (!input.value && input.id === 'date') {
-            input.value = today;
-        }
-    });
-}
-
-// Page transition helpers
-export function navigateToPage(page) {
-    window.location.href = page;
-}
-
-export function goBack() {
-    if (window.history.length > 1) {
-        window.history.back();
-    } else {
-        navigateToPage('index.html');
-    }
-}
-
 // Chart color palette
 export const CHART_COLORS = {
     primary: '#2563eb',
@@ -261,5 +191,29 @@ export const CHART_COLORS = {
     ]
 };
 
-// Initialize on DOM load
-document.addEventListener('DOMContentLoaded', initializeCommonFeatures);
+// Navigation helper (simplified)
+export function setActiveNavItem() {
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === currentPage) {
+            link.classList.add('active');
+        }
+    });
+}
+
+// Initialize common functionality
+document.addEventListener('DOMContentLoaded', () => {
+    setActiveNavItem();
+    
+    // Initialize date inputs with current date
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    const today = new Date().toISOString().split('T')[0];
+    dateInputs.forEach(input => {
+        if (!input.value && input.id === 'date') {
+            input.value = today;
+        }
+    });
+});

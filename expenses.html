@@ -10,7 +10,7 @@
 <body>
     <header>
         <div class="header-content">
-            <h1>💳 Expense Management</h1>
+            <h1 class="header-title">💳 Expense Management</h1>
             <nav class="main-nav">
                 <a href="index.html" class="nav-link">📊 Dashboard</a>
                 <a href="expenses.html" class="nav-link active">💳 Expenses</a>
@@ -22,46 +22,46 @@
 
     <main class="expenses-layout">
         <!-- Add New Expense Form -->
-        <aside class="expense-form-sidebar">
+        <aside class="sidebar">
             <div class="card">
-                <form class="new-entry-form" id="new-entry-form">
-                    <h3 class="form-heading">
-                        <span class="new-expense-heading">💰 Add New Expense</span>
-                        <button type="button" class="close-form-btn" id="close-form" style="display: none;">✕</button>
-                    </h3>
+                <form class="form" id="new-entry-form">
+                    <div class="flex-between mb-2">
+                        <h3 class="section-title new-expense-heading">💰 Add New Expense</h3>
+                        <button type="button" class="btn-icon delete" id="close-form" style="display: none;">✕</button>
+                    </div>
                     
                     <div class="form-group">
                         <label for="amount">💵 Amount ($)</label>
-                        <input id="amount" name="amount" type="number" step="0.01" min="0" max="100000" placeholder="0.00" required/>
+                        <input class="form-input" id="amount" name="amount" type="number" step="0.01" min="0" max="100000" placeholder="0.00" required/>
                     </div>
                     
                     <div class="form-group">
                         <label for="categories">🏷️ Category</label>
-                        <select name="categories" id="categories" required>
+                        <select class="form-select" name="categories" id="categories" required>
                             <option value="">Select a category</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
                         <label for="date">📅 Date</label>
-                        <input type="date" name="date" id="date" required>
+                        <input class="form-input" type="date" name="date" id="date" required>
                     </div>
                     
                     <div class="form-group">
                         <label for="description">📝 Description</label>
-                        <input type="text" name="description" id="description" placeholder="e.g., Grocery shopping at Walmart" required/>
+                        <input class="form-input" type="text" name="description" id="description" placeholder="e.g., Grocery shopping at Walmart" required/>
                     </div>
                     
-                    <button class="submit-button" type="submit">
+                    <button class="btn btn-primary btn-lg submit-button" type="submit">
                         <span class="btn-text">Add Expense</span>
-                        <span class="btn-icon">+</span>
+                        <span>+</span>
                     </button>
                 </form>
             </div>
 
             <!-- Quick Stats -->
-            <div class="card quick-stats">
-                <h3>📊 Today's Summary</h3>
+            <div class="card">
+                <h3 class="section-title">📊 Quick Stats</h3>
                 <div class="stat-item">
                     <span class="stat-label">Today's Spending:</span>
                     <span class="stat-value" id="today-spending">$0.00</span>
@@ -78,12 +78,12 @@
         </aside>
 
         <!-- Expenses Management -->
-        <div class="expenses-content">
+        <div class="main-content">
             <!-- Search and Filter Section -->
-            <section class="filter-section">
-                <div class="search-filter-header">
-                    <h2>🔍 Find & Filter Expenses</h2>
-                    <button class="toggle-filters-btn" id="toggle-filters">
+            <section class="card">
+                <div class="flex-between mb-2">
+                    <h2 class="section-title">🔍 Find & Filter Expenses</h2>
+                    <button class="btn btn-primary btn-sm toggle-filters-btn" id="toggle-filters">
                         <span>Filters</span>
                         <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                             <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5v-2z"/>
@@ -91,36 +91,36 @@
                     </button>
                 </div>
 
-                <div class="search-bar">
-                    <input type="text" id="expense-search" placeholder="🔎 Search expenses by description..." />
+                <div class="search-bar mb-2">
+                    <input class="form-input" type="text" id="expense-search" placeholder="🔎 Search expenses by description..." />
                 </div>
 
                 <div class="filter-panel" id="filter-panel" style="display: none;">
                     <div class="filter-group">
-                        <div class="filter-item">
+                        <div class="form-group">
                             <label for="start-date">From Date</label>
-                            <input type="date" id="start-date">
+                            <input class="form-input" type="date" id="start-date">
                         </div>
-                        <div class="filter-item">
+                        <div class="form-group">
                             <label for="end-date">To Date</label>
-                            <input type="date" id="end-date">
+                            <input class="form-input" type="date" id="end-date">
                         </div>
-                        <div class="filter-item">
+                        <div class="form-group">
                             <label for="filter-category">Category</label>
-                            <select id="filter-category">
+                            <select class="form-select" id="filter-category">
                                 <option value="">All Categories</option>
                             </select>
                         </div>
-                        <div class="filter-item">
+                        <div class="form-group">
                             <label for="min-amount">Min Amount ($)</label>
-                            <input type="number" id="min-amount" placeholder="0" step="0.01">
+                            <input class="form-input" type="number" id="min-amount" placeholder="0" step="0.01">
                         </div>
-                        <div class="filter-item">
+                        <div class="form-group">
                             <label for="max-amount">Max Amount ($)</label>
-                            <input type="number" id="max-amount" placeholder="1000" step="0.01">
+                            <input class="form-input" type="number" id="max-amount" placeholder="1000" step="0.01">
                         </div>
                     </div>
-                    <div class="filter-buttons">
+                    <div class="flex gap-1 mt-2">
                         <button class="btn btn-primary" id="apply-filters">Apply Filters</button>
                         <button class="btn btn-secondary" id="clear-filters">Clear All</button>
                     </div>
@@ -128,28 +128,28 @@
             </section>
 
             <!-- Expenses Table -->
-            <section class="table-section">
-                <div class="table-header">
-                    <h2>📋 Expense History</h2>
-                    <div class="table-actions">
-                        <select id="sort-by" class="sort-select">
+            <section class="card">
+                <div class="section-header">
+                    <h2 class="section-title">📋 Expense History</h2>
+                    <div class="section-actions">
+                        <select id="sort-by" class="form-select">
                             <option value="date-desc">Latest First</option>
                             <option value="date-asc">Oldest First</option>
                             <option value="amount-desc">Highest Amount</option>
                             <option value="amount-asc">Lowest Amount</option>
                             <option value="category">By Category</option>
                         </select>
-                        <button class="btn btn-secondary" id="bulk-delete" style="display: none;">
+                        <button class="btn btn-danger btn-sm" id="bulk-delete" style="display: none;">
                             🗑️ Delete Selected
                         </button>
-                        <button class="btn-export" onclick="exportExpenses()">
+                        <button class="btn btn-success" onclick="exportExpenses()">
                             📥 Export CSV
                         </button>
                     </div>
                 </div>
 
                 <div class="table-container">
-                    <table class="expenses-table">
+                    <table class="table expenses-table">
                         <thead>
                             <tr>
                                 <th>

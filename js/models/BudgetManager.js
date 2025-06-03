@@ -1,25 +1,14 @@
+import { CATEGORIES } from "../utils/categories.js";
 export class BudgetManager {
     constructor(container) {
-        // Define categories with metadata
-        this.categories = {
-            housing: { name: 'Housing', icon: '🏠' },
-            food: { name: 'Food & Dining', icon: '🍔' },
-            transportation: { name: 'Transportation', icon: '🚗' },
-            healthcare: { name: 'Healthcare', icon: '🏥' },
-            education: { name: 'Education', icon: '📚' },
-            personal: { name: 'Personal Care', icon: '💅' },
-            entertainment: { name: 'Entertainment', icon: '🎬' },
-            family: { name: 'Family', icon: '👨‍👩‍👧‍👦' },
-            finances: { name: 'Financial', icon: '💰' },
-            donations: { name: 'Donations', icon: '🎁' },
-            business: { name: 'Business', icon: '💼' }
-        };
+        // Define categories with metadata (updated for simplified 7-category system)
+        this.categories = CATEGORIES;
         
         // Initialize properties
         this.budgets = {};
         this.container = container;
         
-        // Fixed: Add null checks for DOM elements
+        // DOM element references with null checks
         this.totalDisplay = document.querySelector('#total-budget');
         this.statusMessage = document.querySelector('#status-message');
         
@@ -42,10 +31,31 @@ export class BudgetManager {
         this.attachEventListeners();
     }
     
+    // Local storage methods (integrated from shared.js)
+    saveToStorage(key, data) {
+        try {
+            localStorage.setItem(key, JSON.stringify(data));
+            return true;
+        } catch (error) {
+            console.error('Failed to save to storage:', error);
+            return false;
+        }
+    }
+    
+    loadFromStorage(key, defaultValue = null) {
+        try {
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : defaultValue;
+        } catch (error) {
+            console.error('Failed to load from storage:', error);
+            return defaultValue;
+        }
+    }
+    
     loadBudgets() {
         try {
             // Attempt to load from storage
-            const savedData = this.getFromStorage();
+            const savedData = this.loadFromStorage('budgets');
             
             if (savedData && typeof savedData === 'object') {
                 this.budgets = { ...savedData };
@@ -64,11 +74,14 @@ export class BudgetManager {
             this.budgets[category] = 0;
         });
         
-        // Set some example budgets
+        // Set some example budgets for the simplified 7 categories
         this.budgets.housing = 1500;
         this.budgets.food = 600;
         this.budgets.transportation = 300;
+        this.budgets.health = 200;
         this.budgets.entertainment = 200;
+        this.budgets.finances = 100;
+        this.budgets.other = 150;
     }
     
     render() {
@@ -90,40 +103,99 @@ export class BudgetManager {
     
     createBudgetItem(key, category, amount) {
         const item = document.createElement('div');
-        item.className = 'budget-item';
+        item.className = 'budget-item-card';
         
         item.innerHTML = `
-            <div class="category-info">
-                <div class="category-icon category-${key}">${category.icon}</div>
-                <div class="category-name">${category.name}</div>
+            <div class="budget-card-header">
+                <div class="category-info">
+                    <div class="category-icon">${category.icon}</div>
+                    <div class="category-name">${category.name}</div>
+                </div>
+                <div class="budget-status ${this.getStatusClass(amount)}">
+                    ${this.getStatusText(amount)}
+                </div>
             </div>
-            <input 
-                type="number" 
-                class="budget-input" 
-                id="budget-${key}"
-                value="${amount}"
-                min="0"
-                step="10"
-                data-category="${key}"
-            >
-            <div class="budget-display ${this.getAmountClass(amount)}">
-                $${amount.toFixed(2)}
+            
+            <div class="budget-input-section">
+                <label for="budget-${key}">Monthly Budget</label>
+                <div class="input-with-currency">
+                    <span class="currency-symbol">$</span>
+                    <input 
+                        type="number" 
+                        id="budget-${key}"
+                        class="budget-input" 
+                        value="${amount}"
+                        min="0"
+                        step="10"
+                        data-category="${key}"
+                        placeholder="0.00"
+                    >
+                </div>
+            </div>
+            
+            <div class="budget-progress-section">
+                <div class="progress-info">
+                    <span class="spent-amount">Spent: $0.00</span>
+                    <span class="remaining-amount">Left: $${amount.toFixed(2)}</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill good" style="width: 0%"></div>
+                </div>
             </div>
         `;
         
         return item;
     }
     
-    getAmountClass(amount) {
-        if (amount === 0) return 'zero';
-        if (amount > 1000) return 'high';
-        return '';
+    getStatusClass(amount) {
+        if (amount === 0) return 'badge';
+        if (amount > 1000) return 'badge-good';
+        if (amount > 500) return 'badge-warning';
+        return 'badge';
+    }
+    
+    getStatusText(amount) {
+        if (amount === 0) return 'Not Set';
+        if (amount > 1000) return 'High';
+        if (amount > 500) return 'Medium';
+        return 'Low';
     }
     
     updateTotal(total) {
         if (this.totalDisplay) {
-            this.totalDisplay.textContent = `$${total.toFixed(2)}`;
+            this.totalDisplay.textContent = this.formatCurrency(total);
         }
+    }
+    
+    // Utility function for currency formatting (integrated from shared.js)
+    formatCurrency(amount) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD'
+        }).format(amount);
+    }
+    
+    // Notification function (integrated from shared.js)
+    showNotification(message, type = 'info', duration = 3000) {
+        // Remove existing notifications
+        const existing = document.querySelector('.notification');
+        if (existing) existing.remove();
+        
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <span>${message}</span>
+            <button onclick="this.parentElement.remove()">×</button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto remove
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, duration);
     }
     
     attachEventListeners() {
@@ -132,20 +204,20 @@ export class BudgetManager {
             this.container.addEventListener('input', this.handleInputChange);
         }
         
-        // Button listeners - Fixed: Add null checks
-        const saveBtn = document.querySelector('#save-btn');
-        const resetBtn = document.querySelector('#reset-btn');
+        // Button listeners with null checks
+        const saveBtn = document.querySelector('#save-budgets-btn');
+        const resetBtn = document.querySelector('#reset-all-btn');
         
         if (saveBtn) {
             saveBtn.addEventListener('click', this.saveBudgets);
         } else {
-            console.warn('#save-btn not found');
+            console.warn('#save-budgets-btn not found');
         }
         
         if (resetBtn) {
             resetBtn.addEventListener('click', this.resetBudgets);
         } else {
-            console.warn('#reset-btn not found');
+            console.warn('#reset-all-btn not found');
         }
     }
     
@@ -157,16 +229,30 @@ export class BudgetManager {
             // Update budget
             this.budgets[category] = value;
             
-            // Update display
-            const display = event.target.nextElementSibling;
-            if (display) {
-                display.textContent = `$${value.toFixed(2)}`;
-                display.className = `budget-display ${this.getAmountClass(value)}`;
-            }
+            // Update displays
+            this.updateBudgetDisplay(event.target, value);
             
             // Update total
             const total = this.calculateTotal();
             this.updateTotal(total);
+        }
+    }
+    
+    updateBudgetDisplay(input, value) {
+        const budgetCard = input.closest('.budget-item-card');
+        if (!budgetCard) return;
+        
+        // Update status badge
+        const statusBadge = budgetCard.querySelector('.budget-status');
+        if (statusBadge) {
+            statusBadge.className = `budget-status ${this.getStatusClass(value)}`;
+            statusBadge.textContent = this.getStatusText(value);
+        }
+        
+        // Update remaining amount
+        const remainingAmount = budgetCard.querySelector('.remaining-amount');
+        if (remainingAmount) {
+            remainingAmount.textContent = `Left: ${this.formatCurrency(value)}`;
         }
     }
     
@@ -176,44 +262,28 @@ export class BudgetManager {
     
     saveBudgets() {
         try {
-            this.saveToStorage(this.budgets);
-            this.showStatus('Budgets saved successfully!', 'success');
+            this.saveToStorage('budgets', this.budgets);
+            this.showNotification('Budgets saved successfully!', 'success');
         } catch (error) {
             console.error('Error saving budgets:', error);
-            this.showStatus('Error saving budgets. Please try again.', 'error');
+            this.showNotification('Error saving budgets. Please try again.', 'error');
         }
     }
     
     resetBudgets() {
-        if (confirm('Are you sure you want to reset all budgets to $0?')) {
-            Object.keys(this.categories).forEach(category => {
-                this.budgets[category] = 0;
-            });
-            
-            this.render();
-            this.showStatus('All budgets have been reset.', 'success');
+        if (confirm('Are you sure you want to reset all budgets to $0? This action cannot be undone.')) {
+            try {
+                Object.keys(this.categories).forEach(category => {
+                    this.budgets[category] = 0;
+                });
+                
+                this.render();
+                this.showNotification('All budgets have been reset to $0.', 'info');
+            } catch (error) {
+                console.error('Error resetting budgets:', error);
+                this.showNotification('Error resetting budgets. Please try again.', 'error');
+            }
         }
-    }
-    
-    showStatus(message, type) {
-        if (this.statusMessage) {
-            this.statusMessage.textContent = message;
-            this.statusMessage.className = `status-message ${type} show`;
-            
-            setTimeout(() => {
-                this.statusMessage.classList.remove('show');
-            }, 3000);
-        }
-    }
-    
-    // Storage methods - Fixed: Use consistent key name
-    saveToStorage(data) {
-        localStorage.setItem("budgets", JSON.stringify(data)); // Fixed: was "budget"
-    }
-    
-    getFromStorage() {
-        const data = localStorage.getItem("budgets"); // Fixed: was "budget"
-        return data ? JSON.parse(data) : null;
     }
     
     // Public API methods

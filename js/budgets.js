@@ -6,8 +6,6 @@ import {
     calculateSpendingStats,
     formatCurrency,
     showNotification,
-    loadFromStorage,
-    saveToStorage
 } from './shared.js';
 
 let budgetManager = null;
@@ -16,6 +14,7 @@ let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
 
 // Budget templates
+// Updated BUDGET_TEMPLATES for budgets.js - simplified categories
 const BUDGET_TEMPLATES = {
     conservative: {
         name: 'Conservative',
@@ -24,14 +23,10 @@ const BUDGET_TEMPLATES = {
             housing: 1200,
             food: 400,
             transportation: 200,
-            healthcare: 150,
+            health: 150,
             entertainment: 100,
-            personal: 75,
-            education: 50,
-            family: 100,
-            finances: 50,
-            donations: 25,
-            business: 100
+            finances: 100,
+            other: 100
         }
     },
     balanced: {
@@ -41,14 +36,10 @@ const BUDGET_TEMPLATES = {
             housing: 1500,
             food: 600,
             transportation: 300,
-            healthcare: 200,
+            health: 200,
             entertainment: 200,
-            personal: 150,
-            education: 100,
-            family: 150,
-            finances: 100,
-            donations: 50,
-            business: 150
+            finances: 150,
+            other: 200
         }
     },
     flexible: {
@@ -58,14 +49,10 @@ const BUDGET_TEMPLATES = {
             housing: 1800,
             food: 800,
             transportation: 400,
-            healthcare: 250,
+            health: 250,
             entertainment: 400,
-            personal: 250,
-            education: 150,
-            family: 200,
-            finances: 150,
-            donations: 75,
-            business: 200
+            finances: 200,
+            other: 300
         }
     }
 };

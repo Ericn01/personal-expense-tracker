@@ -1,5 +1,17 @@
+// ExpenseList.js - Simplified with integrated storage
 import { Expense } from "./Expense.js";
-import { loadExpensesFromStorage, saveExpensesToStorage } from "../utils/storage.js";
+
+const STORAGE_KEY = 'expenses';
+
+// Storage functions (integrated from storage.js)
+function loadExpensesFromStorage() {
+    const expensesData = localStorage.getItem(STORAGE_KEY);
+    return expensesData ? JSON.parse(expensesData) : [];
+}
+
+function saveExpensesToStorage(expenses) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
+}
 
 export class ExpenseList {
     constructor() {
@@ -20,11 +32,10 @@ export class ExpenseList {
         if (expenseIndex === -1) {
             console.log("The provided expense could not be located");
         } else {
-            // Fixed: use expenseIndex instead of index, and date instead of data
             this.expenses[expenseIndex] = {
                 ...this.expenses[expenseIndex],
                 ...updateData,
-                date: new Date(updateData.date), // Fixed: was 'data'
+                date: new Date(updateData.date),
             };
             saveExpensesToStorage(this.expenses);
             if (this.onUpdate) this.onUpdate();
@@ -32,7 +43,7 @@ export class ExpenseList {
     }
 
     removeExpense(expenseId) {
-        this.expenses = this.expenses.filter(expense => expense.id !== expenseId); // Fixed: use !== instead of !=
+        this.expenses = this.expenses.filter(expense => expense.id !== expenseId);
         saveExpensesToStorage(this.expenses);
         if (this.onUpdate) this.onUpdate();
     }
@@ -42,7 +53,7 @@ export class ExpenseList {
             const matchDate = (!startDate || exp.date >= new Date(startDate)) &&
                 (!endDate || exp.date <= new Date(endDate));
             const matchCategory = !category || exp.category === category;
-            const matchAmount = (!minAmount || exp.amount >= parseFloat(minAmount)) && // Fixed: parse numbers
+            const matchAmount = (!minAmount || exp.amount >= parseFloat(minAmount)) &&
                 (!maxAmount || exp.amount <= parseFloat(maxAmount));
             return matchDate && matchCategory && matchAmount;
         });

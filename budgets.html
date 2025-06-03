@@ -10,7 +10,7 @@
 <body>
     <header>
         <div class="header-content">
-            <h1>📈 Budget Management</h1>
+            <h1 class="header-title">📈 Budget Management</h1>
             <nav class="main-nav">
                 <a href="index.html" class="nav-link">📊 Dashboard</a>
                 <a href="expenses.html" class="nav-link">💳 Expenses</a>
@@ -20,101 +20,101 @@
         </div>
     </header>
 
-    <main class="budgets-layout">
-        <!-- Budget Overview Cards -->
-        <section class="budget-overview-cards">
-            <div class="overview-card total">
-                <div class="card-header">
-                    <h3>💰 Total Monthly Budget</h3>
-                    <span class="trend-indicator" id="budget-trend">📈</span>
-                </div>
-                <div class="card-value">
-                    <span class="amount" id="total-budget">$0.00</span>
-                    <span class="vs-spending">vs $<span id="total-spent-comparison">0.00</span> spent</span>
-                </div>
-            </div>
-
-            <div class="overview-card remaining">
-                <div class="card-header">
-                    <h3>💳 Remaining Budget</h3>
-                    <span class="trend-indicator positive">✅</span>
-                </div>
-                <div class="card-value">
-                    <span class="amount remaining-amount" id="remaining-budget">$0.00</span>
-                    <span class="percentage" id="remaining-percentage">0% remaining</span>
-                </div>
-            </div>
-
-            <div class="overview-card categories">
-                <div class="card-header">
-                    <h3>📊 Categories Set</h3>
-                    <span class="trend-indicator">🎯</span>
-                </div>
-                <div class="card-value">
-                    <span class="amount" id="active-categories">0</span>
-                    <span class="vs-spending">of 11 categories</span>
-                </div>
+    <main class="container budgets-layout">
+        <!-- Month Selection -->
+        <section class="month-navigation mb-4">
+            <div class="flex-center gap-2">
+                <button class="month-nav-btn" id="prev-month">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <h3 class="current-month-display" id="current-month-display">May 2025</h3>
+                <button class="month-nav-btn" id="next-month">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                </svg>
+                </button>
             </div>
         </section>
+        <!-- Budget Overview Cards -->
+        <section class="overview-grid mb-4">
+            <div class="card card-accent">
+                <div class="card-header">
+                    <h3 class="card-title">Total Monthly Budget</h3>
+                    <span class="card-icon" id="budget-trend">📈</span>
+                </div>
+                <div class="card-value" id="total-budget">$0.00</div>
+                <div class="text-secondary">vs $<span id="total-spent-comparison">0.00</span> spent</div>
+            </div>
 
-        <!-- Month Selection -->
-        <section class="month-selector">
-            <h2>📅 Budget for</h2>
-            <div class="month-navigation">
-                <button class="month-nav-btn" id="prev-month">‹</button>
-                <h3 class="current-month-display" id="current-month-display">May 2025</h3>
-                <button class="month-nav-btn" id="next-month">›</button>
+            <div class="card card-accent">
+                <div class="card-header">
+                    <h3 class="card-title">Remaining Budget</h3>
+                    <span class="card-icon text-success">✅</span>
+                </div>
+                <div class="card-value text-success" id="remaining-budget">$0.00</div>
+                <div class="text-secondary" id="remaining-percentage">0% remaining</div>
+            </div>
+
+            <div class="card card-accent">
+                <div class="card-header">
+                    <h3 class="card-title">Categories Set</h3>
+                    <span class="card-icon">🎯</span>
+                </div>
+                <div class="card-value" id="active-categories">0</div>
+                <div class="text-secondary">of 7 categories</div>
             </div>
         </section>
 
         <!-- Budget Categories Management -->
-        <section class="budget-categories">
+        <section class="card mb-4">
             <div class="section-header">
-                <h2>🏷️ Category Budgets</h2>
-                <div class="budget-actions">
+                <h2 class="section-title">Category Budgets</h2>
+                <div class="section-actions">
                     <button class="btn btn-secondary" id="reset-all-btn">🔄 Reset All</button>
                     <button class="btn btn-primary" id="save-budgets-btn">💾 Save Changes</button>
                 </div>
             </div>
 
-            <div class="budget-grid" id="budget-grid">
+            <div class="grid-auto budget-grid" id="budget-grid">
                 <!-- Budget items will be dynamically generated -->
             </div>
         </section>
 
         <!-- Budget Templates -->
-        <section class="budget-templates">
-            <h2>📋 Quick Templates</h2>
-            <div class="template-cards">
-                <div class="template-card" data-template="conservative">
-                    <h3>💡 Conservative</h3>
-                    <p>Perfect for saving-focused budgets</p>
-                    <div class="template-preview">
-                        <span>Housing: $1200</span>
-                        <span>Food: $400</span>
-                        <span>Transport: $200</span>
+        <section class="card mb-4">
+            <h2 class="section-title">📋 Quick Templates</h2>
+            <div class="template-cards grid-3">
+                <div class="template-card card" data-template="conservative">
+                    <h3 class="text-lg font-semibold">💡 Conservative</h3>
+                    <p class="text-secondary mb-2">Perfect for saving-focused budgets</p>
+                    <div class="template-preview p-2 mb-2">
+                        <div class="text-sm text-secondary">Housing: $1200</div>
+                        <div class="text-sm text-secondary">Food: $400</div>
+                        <div class="text-sm text-secondary">Transport: $200</div>
                     </div>
                     <button class="btn btn-outline">Apply Template</button>
                 </div>
 
-                <div class="template-card" data-template="balanced">
-                    <h3>⚖️ Balanced</h3>
-                    <p>Healthy mix of spending and saving</p>
-                    <div class="template-preview">
-                        <span>Housing: $1500</span>
-                        <span>Food: $600</span>
-                        <span>Transport: $300</span>
+                <div class="template-card card" data-template="balanced">
+                    <h3 class="text-lg font-semibold">⚖️ Balanced</h3>
+                    <p class="text-secondary mb-2">Healthy mix of spending and saving</p>
+                    <div class="template-preview p-2 mb-2">
+                        <div class="text-sm text-secondary">Housing: $1500</div>
+                        <div class="text-sm text-secondary">Food: $600</div>
+                        <div class="text-sm text-secondary">Transport: $300</div>
                     </div>
                     <button class="btn btn-outline">Apply Template</button>
                 </div>
 
-                <div class="template-card" data-template="flexible">
-                    <h3>🎯 Flexible</h3>
-                    <p>Higher limits for lifestyle spending</p>
-                    <div class="template-preview">
-                        <span>Housing: $1800</span>
-                        <span>Food: $800</span>
-                        <span>Entertainment: $400</span>
+                <div class="template-card card" data-template="flexible">
+                    <h3 class="text-lg font-semibold">🎯 Flexible</h3>
+                    <p class="text-secondary mb-2">Higher limits for lifestyle spending</p>
+                    <div class="template-preview p-2 mb-2">
+                        <div class="text-sm text-secondary">Housing: $1800</div>
+                        <div class="text-sm text-secondary">Food: $800</div>
+                        <div class="text-sm text-secondary">Entertainment: $400</div>
                     </div>
                     <button class="btn btn-outline">Apply Template</button>
                 </div>
@@ -122,35 +122,35 @@
         </section>
 
         <!-- Budget Progress Visualization -->
-        <section class="budget-progress">
-            <h2>📊 Budget Progress This Month</h2>
+        <section class="card mb-4">
+            <h2 class="section-title">📊 Budget Progress This Month</h2>
             <div class="progress-container" id="budget-progress-container">
                 <!-- Progress bars will be generated here -->
             </div>
         </section>
 
         <!-- Budget Alerts & Recommendations -->
-        <section class="budget-insights">
-            <h2>💡 Smart Insights</h2>
-            <div class="insights-grid">
-                <div class="insight-card recommendations">
-                    <h3>🎯 Recommendations</h3>
+        <section class="card">
+            <h2 class="section-title">💡 Smart Insights</h2>
+            <div class="analysis-grid">
+                <div class="card">
+                    <h3 class="text-lg font-semibold mb-2">🎯 Recommendations</h3>
                     <div class="insight-content" id="recommendations">
-                        <p>Set up your first budget to get personalized recommendations!</p>
+                        <div class="insight-item">Set up your first budget to get personalized recommendations!</div>
                     </div>
                 </div>
 
-                <div class="insight-card alerts">
-                    <h3>🚨 Budget Alerts</h3>
+                <div class="card">
+                    <h3 class="text-lg font-semibold mb-2">🚨 Budget Alerts</h3>
                     <div class="insight-content" id="budget-alerts">
-                        <p>No alerts at the moment. You're doing great!</p>
+                        <div class="insight-item success">No alerts at the moment. You're doing great!</div>
                     </div>
                 </div>
 
-                <div class="insight-card trends">
-                    <h3>📈 Spending Trends</h3>
+                <div class="card">
+                    <h3 class="text-lg font-semibold mb-2">📈 Spending Trends</h3>
                     <div class="insight-content" id="spending-trends">
-                        <p>Add some expenses to see spending trends.</p>
+                        <div class="insight-item">Add some expenses to see spending trends.</div>
                     </div>
                 </div>
             </div>
@@ -158,7 +158,7 @@
     </main>
 
     <!-- Status Message -->
-    <div class="status-message" id="status-message"></div>
+    <div class="notification" id="status-message" style="display: none;"></div>
 
     <!-- Template Confirmation Modal -->
     <div class="modal" id="template-modal" style="display: none;">
@@ -166,7 +166,7 @@
             <h3>📋 Apply Budget Template</h3>
             <p>This will replace your current budget settings. Are you sure you want to continue?</p>
             <div class="modal-actions">
-                <button class="btn btn-secondary">Cancel</button>
+                <button class="btn btn-secondary" onclick="closeTemplateModal()">Cancel</button>
                 <button class="btn btn-primary" id="confirm-template">Apply Template</button>
             </div>
         </div>

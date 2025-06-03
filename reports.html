@@ -10,7 +10,7 @@
 <body>
     <header>
         <div class="header-content">
-            <h1>📋 Financial Reports</h1>
+            <h1 class="header-title">📋 Financial Reports</h1>
             <nav class="main-nav">
                 <a href="index.html" class="nav-link">📊 Dashboard</a>
                 <a href="expenses.html" class="nav-link">💳 Expenses</a>
@@ -20,20 +20,21 @@
         </div>
     </header>
 
-    <main class="reports-layout">
+    <main class="container reports-layout">
         <!-- Report Controls -->
-        <section class="report-controls">
-            <div class="date-range-selector">
-                <h2>📅 Report Period</h2>
-                <div class="date-inputs">
-                    <div class="date-group">
-                        <label for="report-start">From:</label>
-                        <input type="date" id="report-start">
-                    </div>
-                    <div class="date-group">
-                        <label for="report-end">To:</label>
-                        <input type="date" id="report-end">
-                    </div>
+        <section class="card mb-4">
+            <h2 class="section-title">📅 Report Period</h2>
+            <div class="flex gap-2 mb-3">
+                <div class="form-group">
+                    <label for="report-start">From:</label>
+                    <input class="form-input" type="date" id="report-start">
+                </div>
+                <div class="form-group">
+                    <label for="report-end">To:</label>
+                    <input class="form-input" type="date" id="report-end">
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
                     <button class="btn btn-primary" id="generate-report">Generate Report</button>
                 </div>
             </div>
@@ -47,8 +48,8 @@
         </section>
 
         <!-- Summary Statistics -->
-        <section class="report-summary">
-            <h2>📊 Summary Statistics</h2>
+        <section class="card mb-4">
+            <h2 class="section-title">📊 Summary Statistics</h2>
             <div class="summary-grid">
                 <div class="summary-card">
                     <div class="summary-icon">💰</div>
@@ -89,12 +90,13 @@
         </section>
 
         <!-- Detailed Analysis -->
-        <section class="detailed-analysis">
+        <section class="card mb-4">
+            <h2 class="section-title">📊 Detailed Analysis</h2>
             <div class="analysis-grid">
                 <!-- Top Categories Table -->
-                <div class="analysis-card">
-                    <h3>🏆 Top Spending Categories</h3>
-                    <div class="table-container small">
+                <div class="card">
+                    <h3 class="text-lg font-semibold mb-2">🏆 Top Spending Categories</h3>
+                    <div class="table-container">
                         <table class="analysis-table">
                             <thead>
                                 <tr>
@@ -112,24 +114,24 @@
                 </div>
 
                 <!-- Monthly Comparison -->
-                <div class="analysis-card">
-                    <h3>📊 Monthly Comparison</h3>
+                <div class="card">
+                    <h3 class="text-lg font-semibold mb-2">📊 Monthly Comparison</h3>
                     <div class="comparison-container" id="monthly-comparison">
                         <!-- Monthly comparison data -->
                     </div>
                 </div>
 
                 <!-- Spending Insights -->
-                <div class="analysis-card">
-                    <h3>💡 Spending Insights</h3>
-                    <div class="insights-list" id="spending-insights">
+                <div class="card">
+                    <h3 class="text-lg font-semibold mb-2">💡 Spending Insights</h3>
+                    <div class="insight-content" id="spending-insights">
                         <!-- AI-generated insights -->
                     </div>
                 </div>
 
                 <!-- Budget Performance -->
-                <div class="analysis-card">
-                    <h3>🎯 Budget Performance</h3>
+                <div class="card">
+                    <h3 class="text-lg font-semibold mb-2">🎯 Budget Performance</h3>
                     <div class="budget-performance" id="budget-performance">
                         <!-- Budget performance metrics -->
                     </div>
@@ -138,8 +140,8 @@
         </section>
 
         <!-- Export Options -->
-        <section class="export-section">
-            <h2>📥 Export Options</h2>
+        <section class="card">
+            <h2 class="section-title">📥 Export Options</h2>
             <div class="export-options">
                 <button class="export-btn" onclick="exportReport('pdf')">
                     <span class="export-icon">📄</span>

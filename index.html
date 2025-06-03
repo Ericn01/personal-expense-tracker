@@ -11,7 +11,7 @@
 <body>
     <header>
         <div class="header-content">
-            <h1>💰 Financial Dashboard</h1>
+            <h1 class="header-title">💰 Financial Dashboard</h1>
             <nav class="main-nav">
                 <a href="index.html" class="nav-link active">📊 Dashboard</a>
                 <a href="expenses.html" class="nav-link">💳 Expenses</a>
@@ -21,7 +21,7 @@
         </div>
     </header>
 
-    <main class="dashboard-main">
+    <main class="container">
         <!-- Month Navigation -->
         <section class="month-navigation">
             <button class="month-nav-btn" id="prev-month">
@@ -38,92 +38,112 @@
         </section>
 
         <!-- Financial Overview Cards -->
-        <section class="financial-overview">
-            <div class="overview-cards">
-                <div class="overview-card primary">
-                    <div class="card-icon">💰</div>
-                    <div class="card-content">
-                        <h3>Total Spent</h3>
-                        <p class="amount total-spent">$0.00</p>
-                        <span class="trend" id="spending-trend">↗️ +5.2% from last month</span>
+        <section class="mb-4">
+            <div class="overview-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Total Spent</h3>
+                        <div class="card-icon">💰</div>
                     </div>
+                    <div class="card-value total-spent">$0.00</div>
+                    <div class="trend" id="spending-trend">↗️ +5.2% from last month</div>
                 </div>
                 
-                <div class="overview-card success">
-                    <div class="card-icon">💳</div>
-                    <div class="card-content">
-                        <h3>Remaining Budget</h3>
-                        <p class="amount remaining-budget">$0.00</p>
-                        <span class="trend positive" id="budget-trend">🎯 68% remaining</span>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Remaining Budget</h3>
+                        <div class="card-icon">💳</div>
                     </div>
+                    <div class="card-value remaining-budget">$0.00</div>
+                    <div class="trend positive" id="budget-trend">🎯 68% remaining</div>
                 </div>
                 
-                <div class="overview-card warning">
-                    <div class="card-icon">📊</div>
-                    <div class="card-content">
-                        <h3>Daily Average</h3>
-                        <p class="amount average-spending">$0.00</p>
-                        <span class="trend" id="daily-trend">📈 Track your habits</span>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Daily Average</h3>
+                        <div class="card-icon">📊</div>
                     </div>
+                    <div class="card-value average-spending">$0.00</div>
+                    <div class="trend" id="daily-trend">📈 Track your habits</div>
                 </div>
                 
-                <div class="overview-card info">
-                    <div class="card-icon">🎯</div>
-                    <div class="card-content">
-                        <h3>Monthly Goal</h3>
-                        <p class="amount monthly-goal">$0.00</p>
-                        <span class="trend" id="goal-progress">🚀 On track</span>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Monthly Goal</h3>
+                        <div class="card-icon">🎯</div>
                     </div>
+                    <div class="card-value monthly-goal">$0.00</div>
+                    <div class="trend" id="goal-progress">🚀 On track</div>
                 </div>
             </div>
         </section>
 
-        <!-- Alerts and Notifications -->
-        <section class="alerts-section">
-            <h2>💡 Smart Insights</h2>
-            <div class="alerts-container" id="alerts-container">
-                <!-- Dynamic alerts will be inserted here -->
-            </div>
-        </section>
+        <!-- Main Content Grid -->
+        <div class="content-grid">
+            <div class="flex-col">
+                <!-- Alerts and Notifications -->
+                <section class="card">
+                    <h2 class="section-title">💡 Smart Insights</h2>
+                    <div class="alerts-container" id="alerts-container">
+                        <!-- Dynamic alerts will be inserted here -->
+                    </div>
+                </section>
 
-        <!-- Charts and Analytics -->
-        <section class="analytics-section">
-            <div class="charts-grid">
-                <div class="chart-card large">
-                    <h3>📈 Spending Trends</h3>
-                    <canvas id="spendingTrendChart"></canvas>
-                </div>
-                
-                <div class="chart-card">
-                    <h3>🍰 Category Breakdown</h3>
-                    <canvas id="categoryChart"></canvas>
-                </div>
-                
-                <div class="chart-card">
-                    <h3>📅 Weekly Pattern</h3>
-                    <canvas id="weeklyChart"></canvas>
-                </div>
+                <!-- Charts and Analytics -->
+                <section class="card">
+                    <h2 class="section-title">📈 Analytics</h2>
+                    <div class="charts-grid">
+                        <div class="chart-section">
+                            <div class="chart-header">
+                                <h3 class="chart-title">Spending Trends</h3>
+                            </div>
+                            <div class="chart-container lg">
+                                <canvas id="spendingTrendChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-section">
+                            <div class="chart-header">
+                                <h3 class="chart-title">Category Breakdown</h3>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-section">
+                            <div class="chart-header">
+                                <h3 class="chart-title">Weekly Pattern</h3>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="weeklyChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
-        </section>
 
-        <!-- Recent Activity Preview -->
-        <section class="recent-activity">
-            <div class="section-header">
-                <h2>⚡ Recent Activity</h2>
-                <a href="expenses.html" class="view-all-link">View All →</a>
-            </div>
-            <div class="activity-list" id="recent-expenses">
-                <!-- Recent expenses will be loaded here -->
-            </div>
-        </section>
+            <div class="flex-col">
+                <!-- Recent Activity Preview -->
+                <section class="card">
+                    <div class="section-header">
+                        <h2 class="section-title">⚡ Recent Activity</h2>
+                        <a href="expenses.html" class="btn btn-sm btn-outline">View All →</a>
+                    </div>
+                    <div class="activity-list" id="recent-expenses">
+                        <!-- Recent expenses will be loaded here -->
+                    </div>
+                </section>
 
-        <!-- Budget Status Summary -->
-        <section class="budget-summary">
-            <h2>📊 Budget Status</h2>
-            <div class="budget-overview" id="budget-overview">
-                <!-- Budget progress bars will be generated here -->
+                <!-- Budget Status Summary -->
+                <section class="card">
+                    <h2 class="section-title">📊 Budget Status</h2>
+                    <div class="budget-overview" id="budget-overview">
+                        <!-- Budget progress bars will be generated here -->
+                    </div>
+                </section>
             </div>
-        </section>
+        </div>
     </main>
 
     <footer>
