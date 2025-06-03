@@ -173,7 +173,7 @@ header {
 
 .content-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 2.5fr 1fr;
     gap: 2rem;
     margin-bottom: 2rem;
 }
@@ -197,6 +197,10 @@ header {
     padding: 1.5rem;
     box-shadow: var(--shadow);
     border: 1px solid var(--border-color);
+}
+
+.spending-trends{
+    grid-column: span 2;
 }
 
 .chart-header {
