@@ -1,6 +1,6 @@
-// budgets.js - Budget management functionality
+// budgets.js - Budget management functionality with StateManager
+import stateManager from './models/StateManager.js';
 import { 
-    expenseList, 
     initializeBudgetManager, 
     initializeMonthNavigator,
     calculateSpendingStats,
@@ -10,11 +10,8 @@ import {
 
 let budgetManager = null;
 let monthNavigator = null;
-let currentMonth = new Date().getMonth();
-let currentYear = new Date().getFullYear();
 
 // Budget templates
-// Updated BUDGET_TEMPLATES for budgets.js - simplified categories
 const BUDGET_TEMPLATES = {
     conservative: {
         name: 'Conservative',
@@ -61,6 +58,7 @@ const BUDGET_TEMPLATES = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeBudgetsPage();
     setupEventListeners();
+    setupStateListeners();
     updateBudgetDisplay();
 });
 
@@ -69,10 +67,32 @@ function initializeBudgetsPage() {
     budgetManager = initializeBudgetManager();
     
     // Initialize month navigator
-    monthNavigator = initializeMonthNavigator(updateBudgetDisplay);
+    monthNavigator = initializeMonthNavigator();
     
     // Set current month display
     updateMonthDisplay();
+}
+
+function setupStateListeners() {
+    // Listen for state changes
+    stateManager.on('monthChange', handleMonthChange);
+    stateManager.on('expenseUpdate', handleExpenseUpdate);
+    stateManager.on('budgetUpdate', handleBudgetUpdate);
+}
+
+function handleMonthChange(data) {
+    updateMonthDisplay();
+    updateBudgetDisplay();
+}
+
+function handleExpenseUpdate(data) {
+    // Update budget display when expenses change
+    updateBudgetDisplay();
+}
+
+function handleBudgetUpdate(data) {
+    // Update display when budgets change (from other tabs)
+    updateBudgetDisplay();
 }
 
 function setupEventListeners() {
@@ -88,6 +108,12 @@ function setupEventListeners() {
         resetAllBtn.addEventListener('click', resetAllBudgets);
     }
     
+    // Copy from previous month button
+    const copyPrevBtn = document.getElementById('copy-previous-btn');
+    if (copyPrevBtn) {
+        copyPrevBtn.addEventListener('click', copyFromPreviousMonth);
+    }
+    
     // Template cards
     document.querySelectorAll('.template-card').forEach(card => {
         const applyBtn = card.querySelector('.btn');
@@ -101,9 +127,6 @@ function setupEventListeners() {
     
     // Template modal events
     setupTemplateModalEvents();
-    
-    // Month navigation (if different from shared navigator)
-    setupCustomMonthNavigation();
 }
 
 function updateBudgetDisplay() {
@@ -115,10 +138,8 @@ function updateBudgetDisplay() {
 }
 
 function updateOverviewCards() {
-    if (!budgetManager) return;
-    
-    const budgets = budgetManager.getAllBudgets();
-    const stats = calculateSpendingStats(expenseList.expenses, budgets);
+    const state = stateManager.getState();
+    const { stats, budgets, monthlyExpenses } = state;
     
     // Total budget
     const totalBudgetEl = document.getElementById('total-budget');
@@ -129,7 +150,7 @@ function updateOverviewCards() {
     // Total spent comparison
     const totalSpentComparisonEl = document.getElementById('total-spent-comparison');
     if (totalSpentComparisonEl) {
-        totalSpentComparisonEl.textContent = stats.totalSpent.toFixed(2);
+        totalSpentComparisonEl.textContent = formatCurrency(stats.totalSpent);
     }
     
     // Remaining budget
@@ -162,20 +183,20 @@ function updateBudgetTrend(stats) {
     if (!trendEl) return;
     
     if (stats.totalBudget === 0) {
-        trendEl.textContent = '📋';
+        trendEl.textContent = '📋 Set budgets';
         return;
     }
     
     const usedPercentage = (stats.totalSpent / stats.totalBudget) * 100;
     
     if (usedPercentage <= 50) {
-        trendEl.textContent = '📈';
+        trendEl.textContent = '📈 Great progress';
     } else if (usedPercentage <= 75) {
-        trendEl.textContent = '⚠️';
+        trendEl.textContent = '⚠️ Monitor closely';
     } else if (usedPercentage <= 100) {
-        trendEl.textContent = '🔥';
+        trendEl.textContent = '🔥 Nearly spent';
     } else {
-        trendEl.textContent = '🚨';
+        trendEl.textContent = '🚨 Over budget';
     }
 }
 
@@ -185,109 +206,8 @@ function updateBudgetGrid() {
     const budgetGrid = document.getElementById('budget-grid');
     if (!budgetGrid) return;
     
-    budgetGrid.innerHTML = '';
-    
-    const budgets = budgetManager.getAllBudgets();
-    const stats = calculateSpendingStats(expenseList.expenses, budgets);
-    
-    // Get categories from budget manager
-    const categories = budgetManager.categories || {};
-    
-    Object.entries(categories).forEach(([key, categoryInfo]) => {
-        const budgetAmount = budgets[key] || 0;
-        const spent = stats.categoryTotals[key] || 0;
-        const remaining = Math.max(0, budgetAmount - spent);
-        const percentage = budgetAmount > 0 ? (spent / budgetAmount) * 100 : 0;
-        
-        const budgetItem = document.createElement('div');
-        budgetItem.className = 'budget-item-card';
-        budgetItem.innerHTML = `
-            <div class="budget-card-header">
-                <div class="category-info">
-                    <span class="category-icon">${categoryInfo.icon}</span>
-                    <span class="category-name">${categoryInfo.name}</span>
-                </div>
-                <div class="budget-status ${getStatusClass(percentage)}">
-                    ${percentage.toFixed(0)}%
-                </div>
-            </div>
-            
-            <div class="budget-input-section">
-                <label for="budget-${key}">Monthly Budget</label>
-                <div class="input-with-currency">
-                    <span class="currency-symbol">$</span>
-                    <input 
-                        type="number" 
-                        id="budget-${key}"
-                        class="budget-input" 
-                        value="${budgetAmount}"
-                        min="0"
-                        step="10"
-                        data-category="${key}"
-                        placeholder="0.00"
-                    >
-                </div>
-            </div>
-            
-            <div class="budget-progress-section">
-                <div class="progress-info">
-                    <span class="spent-amount">Spent: ${formatCurrency(spent)}</span>
-                    <span class="remaining-amount">Left: ${formatCurrency(remaining)}</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill ${getProgressClass(percentage)}" 
-                         style="width: ${Math.min(percentage, 100)}%"></div>
-                </div>
-            </div>
-        `;
-        
-        budgetGrid.appendChild(budgetItem);
-    });
-    
-    // Attach input event listeners
-    attachBudgetInputListeners();
-}
-
-function getStatusClass(percentage) {
-    if (percentage <= 75) return 'status-good';
-    if (percentage <= 90) return 'status-warning';
-    return 'status-danger';
-}
-
-function getProgressClass(percentage) {
-    if (percentage <= 75) return 'progress-good';
-    if (percentage <= 90) return 'progress-warning';
-    return 'progress-danger';
-}
-
-function attachBudgetInputListeners() {
-    document.querySelectorAll('.budget-input').forEach(input => {
-        input.addEventListener('input', handleBudgetInputChange);
-        input.addEventListener('blur', handleBudgetInputBlur);
-    });
-}
-
-function handleBudgetInputChange(e) {
-    const category = e.target.dataset.category;
-    const value = parseFloat(e.target.value) || 0;
-    
-    // Update budget manager
-    if (budgetManager) {
-        budgetManager.setBudget(category, value);
-    }
-    
-    // Update displays immediately for better UX
-    updateOverviewCards();
-    updateProgressVisualization();
-}
-
-function handleBudgetInputBlur(e) {
-    // Format the input value
-    const value = parseFloat(e.target.value) || 0;
-    e.target.value = value;
-    
-    // Update budget grid to reflect any changes
-    setTimeout(() => updateBudgetGrid(), 100);
+    // Let the budget manager handle its own rendering
+    budgetManager.render();
 }
 
 function updateProgressVisualization() {
@@ -296,8 +216,8 @@ function updateProgressVisualization() {
     
     progressContainer.innerHTML = '';
     
-    const budgets = budgetManager.getAllBudgets();
-    const stats = calculateSpendingStats(expenseList.expenses, budgets);
+    const state = stateManager.getState();
+    const { budgets, stats } = state;
     
     // Only show categories with budgets > 0
     const activeBudgets = Object.entries(budgets).filter(([, budget]) => budget > 0);
@@ -342,6 +262,18 @@ function updateProgressVisualization() {
     });
 }
 
+function getStatusClass(percentage) {
+    if (percentage <= 75) return 'status-good';
+    if (percentage <= 90) return 'status-warning';
+    return 'status-danger';
+}
+
+function getProgressClass(percentage) {
+    if (percentage <= 75) return 'progress-good';
+    if (percentage <= 90) return 'progress-warning';
+    return 'progress-danger';
+}
+
 function getStatusText(percentage) {
     if (percentage <= 50) return 'On track';
     if (percentage <= 75) return 'Good pace';
@@ -358,10 +290,10 @@ function updateInsights() {
 
 function updateRecommendations() {
     const recommendationsEl = document.getElementById('recommendations');
-    if (!recommendationsEl || !budgetManager) return;
+    if (!recommendationsEl) return;
     
-    const budgets = budgetManager.getAllBudgets();
-    const stats = calculateSpendingStats(expenseList.expenses, budgets);
+    const state = stateManager.getState();
+    const { budgets, stats } = state;
     const recommendations = [];
     
     // Generate smart recommendations
@@ -408,10 +340,10 @@ function updateRecommendations() {
 
 function updateBudgetAlerts() {
     const alertsEl = document.getElementById('budget-alerts');
-    if (!alertsEl || !budgetManager) return;
+    if (!alertsEl) return;
     
-    const budgets = budgetManager.getAllBudgets();
-    const stats = calculateSpendingStats(expenseList.expenses, budgets);
+    const state = stateManager.getState();
+    const { budgets, stats } = state;
     const alerts = [];
     
     Object.entries(budgets).forEach(([category, budget]) => {
@@ -442,7 +374,8 @@ function updateSpendingTrends() {
     const trendsEl = document.getElementById('spending-trends');
     if (!trendsEl) return;
     
-    const stats = calculateSpendingStats(expenseList.expenses);
+    const state = stateManager.getState();
+    const { stats, month, year } = state;
     const trends = [];
     
     if (stats.transactionCount > 0) {
@@ -459,12 +392,17 @@ function updateSpendingTrends() {
             trends.push(`🏆 Top category: ${category} (${percentage.toFixed(0)}%)`);
         }
         
-        // Daily average
-        const now = new Date();
-        const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-        const dailyAvg = stats.totalSpent / now.getDate();
-        const projectedMonthly = dailyAvg * daysInMonth;
-        trends.push(`📅 Projected monthly: ${formatCurrency(projectedMonthly)}`);
+        // Daily average and projection
+        const currentDate = new Date();
+        if (currentDate.getMonth() === month && currentDate.getFullYear() === year) {
+            // Current month - show projection
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const projectedMonthly = stats.avgDaily * daysInMonth;
+            trends.push(`📅 Projected monthly: ${formatCurrency(projectedMonthly)}`);
+        } else {
+            // Past month - show total
+            trends.push(`📊 Month total: ${formatCurrency(stats.totalSpent)}`);
+        }
     } else {
         trends.push("📊 Add some expenses to see spending trends!");
     }
@@ -475,31 +413,26 @@ function updateSpendingTrends() {
 }
 
 function saveBudgets() {
-    if (!budgetManager) return;
-    
-    try {
-        budgetManager.saveBudgets();
-        showNotification('Budgets saved successfully!', 'success');
-        updateLastUpdated();
-    } catch (error) {
-        showNotification('Error saving budgets. Please try again.', 'error');
-        console.error('Error saving budgets:', error);
-    }
+    stateManager.saveBudgets();
+    updateLastUpdated();
 }
 
 function resetAllBudgets() {
     if (!budgetManager) return;
     
-    if (confirm('Are you sure you want to reset all budgets to $0? This action cannot be undone.')) {
-        try {
-            budgetManager.resetBudgets();
-            updateBudgetDisplay();
-            showNotification('All budgets have been reset to $0.', 'info');
-        } catch (error) {
-            showNotification('Error resetting budgets. Please try again.', 'error');
-            console.error('Error resetting budgets:', error);
-        }
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+    const { month, year } = stateManager.getState();
+    const confirmMsg = `Are you sure you want to reset all budgets for ${monthNames[month]} ${year} to $0? This action cannot be undone.`;
+    
+    if (confirm(confirmMsg)) {
+        stateManager.resetBudgets();
     }
+}
+
+function copyFromPreviousMonth() {
+    if (!budgetManager) return;
+    budgetManager.copyFromPreviousMonth();
 }
 
 function showTemplateModal(templateKey) {
@@ -531,12 +464,12 @@ function showTemplateModal(templateKey) {
 
 function applyTemplate(templateKey) {
     const template = BUDGET_TEMPLATES[templateKey];
-    if (!template || !budgetManager) return;
+    if (!template) return;
     
     try {
         // Apply template budgets
         Object.entries(template.budgets).forEach(([category, amount]) => {
-            budgetManager.setBudget(category, amount);
+            stateManager.setBudget(category, amount);
         });
         
         // Update display
@@ -565,17 +498,13 @@ function setupTemplateModalEvents() {
     });
 }
 
-function setupCustomMonthNavigation() {
-    // This would handle month navigation specific to budgets
-    // For now, we'll use the shared month navigator
-}
-
 function updateMonthDisplay() {
     const monthDisplay = document.getElementById('current-month-display');
     if (monthDisplay) {
+        const state = stateManager.getState();
         const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
             'July', 'August', 'September', 'October', 'November', 'December'];
-        monthDisplay.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+        monthDisplay.textContent = `${monthNames[state.month]} ${state.year}`;
     }
 }
 

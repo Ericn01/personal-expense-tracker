@@ -1,30 +1,25 @@
-// shared.js - Common functionality across all pages (Simplified)
-import { ExpenseList } from "./models/ExpenseList.js";
-import { BudgetManager } from "./models/BudgetManager.js";
-import { MonthNavigator } from "./models/MonthNavigator.js";
+// Shared utility functions and global instances for the expense tracker application
 
-// Global instances - shared across pages
-export const expenseList = new ExpenseList();
+import stateManager from "./models/StateManager.js";
+
+export const expenseList = stateManager.expenseList;
 
 
-// Factory functions for managers (only create when needed)
+// Factory functions for managers
 export function initializeBudgetManager() {
     const budgetContainer = document.querySelector('#budget-list') || document.querySelector('#budget-grid');
-    if (budgetContainer) {
-        return new BudgetManager(budgetContainer);
-    }
-    return null;
+    return stateManager.initializeBudgetManager(budgetContainer);
 }
 
 export function initializeMonthNavigator(updateCallback = null) {
-    const prevBtn = document.getElementById('prev-month');
-    const nextBtn = document.getElementById('next-month');
-    const display = document.getElementById('current-month-display');
+    const monthNav = stateManager.initializeMonthNavigator();
     
-    if (prevBtn && nextBtn && display) {
-        return new MonthNavigator(expenseList, updateCallback);
+    // Add custom callback if provided
+    if (updateCallback && monthNav) {
+        stateManager.on('monthChange', updateCallback);
     }
-    return null;
+    
+    return monthNav;
 }
 
 // Utility functions
