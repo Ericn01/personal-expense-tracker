@@ -132,7 +132,6 @@ function setupEventListeners() {
 function updateBudgetDisplay() {
     updateOverviewCards();
     updateBudgetGrid();
-    updateProgressVisualization();
     updateInsights();
     updateLastUpdated();
 }
@@ -210,77 +209,6 @@ function updateBudgetGrid() {
     budgetManager.render();
 }
 
-function updateProgressVisualization() {
-    const progressContainer = document.getElementById('budget-progress-container');
-    if (!progressContainer || !budgetManager) return;
-    
-    progressContainer.innerHTML = '';
-    
-    const state = stateManager.getState();
-    const { budgets, stats } = state;
-    
-    // Only show categories with budgets > 0
-    const activeBudgets = Object.entries(budgets).filter(([, budget]) => budget > 0);
-    
-    if (activeBudgets.length === 0) {
-        progressContainer.innerHTML = `
-            <div class="empty-progress">
-                <p>Set some budgets to see progress visualization!</p>
-                <button class="btn btn-primary" onclick="focusFirstBudgetInput()">Set Your First Budget</button>
-            </div>
-        `;
-        return;
-    }
-    
-    activeBudgets.forEach(([category, budget]) => {
-        const spent = stats.categoryTotals[category] || 0;
-        const percentage = (spent / budget) * 100;
-        const remaining = Math.max(0, budget - spent);
-        
-        const progressItem = document.createElement('div');
-        progressItem.className = 'progress-visualization-item';
-        progressItem.innerHTML = `
-            <div class="progress-header">
-                <h4>${category.charAt(0).toUpperCase() + category.slice(1)}</h4>
-                <span class="progress-amounts">${formatCurrency(spent)} / ${formatCurrency(budget)}</span>
-            </div>
-            <div class="progress-bar-large">
-                <div class="progress-fill-large ${getProgressClass(percentage)}" 
-                     style="width: ${Math.min(percentage, 100)}%">
-                    <span class="progress-text">${percentage.toFixed(0)}%</span>
-                </div>
-            </div>
-            <div class="progress-details">
-                <span class="remaining-text">${formatCurrency(remaining)} remaining</span>
-                <span class="status-text ${getStatusClass(percentage)}">
-                    ${getStatusText(percentage)}
-                </span>
-            </div>
-        `;
-        
-        progressContainer.appendChild(progressItem);
-    });
-}
-
-function getStatusClass(percentage) {
-    if (percentage <= 75) return 'status-good';
-    if (percentage <= 90) return 'status-warning';
-    return 'status-danger';
-}
-
-function getProgressClass(percentage) {
-    if (percentage <= 75) return 'progress-good';
-    if (percentage <= 90) return 'progress-warning';
-    return 'progress-danger';
-}
-
-function getStatusText(percentage) {
-    if (percentage <= 50) return 'On track';
-    if (percentage <= 75) return 'Good pace';
-    if (percentage <= 90) return 'Watch spending';
-    if (percentage <= 100) return 'Almost there';
-    return 'Over budget';
-}
 
 function updateInsights() {
     updateRecommendations();
