@@ -21,7 +21,7 @@ class StateManager {
             monthChange: [],
             stateChange: []
         };
-        
+
         // Bind methods
         this.handleExpenseUpdate = this.handleExpenseUpdate.bind(this);
         this.handleBudgetUpdate = this.handleBudgetUpdate.bind(this);
