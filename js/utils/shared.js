@@ -1,6 +1,6 @@
 // Shared utility functions and global instances for the expense tracker application
 
-import stateManager from "./models/StateManager.js";
+import stateManager from "../models/StateManager.js";
 
 export const expenseList = stateManager.expenseList;
 

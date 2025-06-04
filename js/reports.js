@@ -4,7 +4,7 @@ import {
     formatCurrency, 
     showNotification, 
     exportToCSV,
-} from './shared.js';
+} from './utils/shared.js';
 
 let currentReportPeriod="weekly"
 

@@ -6,7 +6,7 @@ import {
     calculateSpendingStats,
     formatCurrency,
     showNotification,
-} from './shared.js';
+} from './utils/shared.js';
 
 let budgetManager = null;
 let monthNavigator = null;

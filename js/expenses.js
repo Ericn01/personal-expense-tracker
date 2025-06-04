@@ -8,7 +8,7 @@ import {
     showNotification, 
     exportToCSV,
     debounce
-} from './shared.js';
+} from './utils/shared.js';
 
 // Global variables
 const expenseList = new ExpenseList();

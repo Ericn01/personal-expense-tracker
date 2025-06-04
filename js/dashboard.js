@@ -8,7 +8,7 @@ import {
     formatCurrency,
     formatDate,
     CHART_COLORS
-} from './shared.js';
+} from './utils/shared.js';
 
 // Global variables
 let budgetManager = null;
@@ -722,7 +722,7 @@ function setupPeriodicUpdates() {
 
 // Export functionality
 window.exportData = function() {
-    import('./shared.js').then(({ exportToCSV }) => {
+    import('./utils/shared.js').then(({ exportToCSV }) => {
         exportToCSV(expenseList.expenses, 'financial-data.csv');
     });
 };
