@@ -2,6 +2,7 @@
 import { ExpenseList } from "./models/ExpenseList.js";
 import { Expense } from "./models/Expense.js";
 import { populateCategoryDropdown } from "./utils/categories.js";
+import { handleExpenseImport } from "./utils/importer.js";
 import { 
     formatCurrency, 
     formatDate, 
@@ -97,6 +98,21 @@ function setupEventListeners() {
     if (closeFormBtn) {
         closeFormBtn.addEventListener('click', resetForm);
     }
+
+    // Import listener
+    const importInput = document.getElementById('expense-import-input');
+    if (importInput) {
+    importInput.addEventListener('change', (event) => {
+        handleExpenseImport(event, {
+            statusElementId: 'import-status',
+            onSuccess: (count) => {
+                // Update displays after successful import
+                updateExpensesDisplay();
+                updateQuickStats();
+            }
+        });
+    });
+}
     
     // Modal events
     setupModalEvents();
@@ -322,12 +338,6 @@ function editExpense(id) {
     // Update form state
     editingId = id;
     updateFormForEditing(true);
-    
-    // Scroll to form
-    document.querySelector('.expense-form-sidebar').scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-    });
     
     // Focus on amount field
     document.getElementById('amount').focus();

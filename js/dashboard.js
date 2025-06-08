@@ -10,6 +10,8 @@ import {
     CHART_COLORS
 } from './utils/shared.js';
 
+import { handleExpenseImport } from './utils/importer.js';
+
 // Global variables
 let budgetManager = null;
 let monthNavigator = null;
@@ -700,12 +702,12 @@ function showFallbackContent() {
 }
 
 function setupPeriodicUpdates() {
-    // Update dashboard every 30 seconds
+    // Update dashboard every 10 seconds
     setInterval(() => {
         if (document.visibilityState === 'visible') {
             updateDashboard();
         }
-    }, 30 * 1000);
+    }, 10 * 1000);
     
     // Update on window focus
     window.addEventListener('focus', updateDashboard);
@@ -730,3 +732,73 @@ window.exportData = function() {
 window.showSettings = function() {
     alert('Settings panel coming soon!');
 };
+
+
+// Welcome Modal Implementation
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if user has any expenses
+    const expenses = window.stateManager?.expenseList?.expenses || [];
+    const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
+    
+    // Show welcome modal if no expenses and hasn't been shown before
+    if (expenses.length === 0 && !hasSeenWelcome) {
+        showWelcomeModal();
+    }
+});
+
+function showWelcomeModal() {
+    const modal = document.getElementById('welcomeModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        
+        // Set up event listeners
+        setupWelcomeModalListeners();
+    }
+}
+
+function setupWelcomeModalListeners() {
+    // File input handler
+    const fileInput = document.getElementById('welcomeFileInput');
+    if (fileInput) {
+        fileInput.addEventListener('change', (event) => {
+            handleExpenseImport(event, {
+                statusElementId: 'importStatus',  // Note: different ID for welcome modal
+                onSuccess: (count) => {
+                    // Update dashboard after import
+                    if (typeof updateDashboard === 'function') {
+                        updateDashboard();
+                    }
+                    
+                    // Close modal after delay
+                    setTimeout(() => {
+                        closeWelcomeModal();
+                    }, 2000);
+                }
+            });
+        });
+    }
+    
+    // Skip button handler
+    const skipBtn = document.getElementById('skipWelcome');
+    if (skipBtn) {
+        skipBtn.addEventListener('click', closeWelcomeModal);
+    }
+    
+    // Close on backdrop click
+    const modal = document.getElementById('welcomeModal');
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeWelcomeModal();
+        }
+    });
+}
+
+
+function closeWelcomeModal() {
+    const modal = document.getElementById('welcomeModal');
+    if (modal) {
+        modal.style.display = 'none';
+        // Mark as seen
+        localStorage.setItem('hasSeenWelcome', 'true');
+    }
+}

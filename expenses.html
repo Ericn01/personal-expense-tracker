@@ -75,6 +75,34 @@
                     <span class="stat-value" id="month-spending">$0.00</span>
                 </div>
             </div>
+
+            <!-- Import Expenses Card -->
+            <div class="card">
+                <h3 class="section-title">📤 Import Expenses</h3>
+                <div class="import-section-content">
+                    <p class="import-description">Import expenses from CSV or JSON file</p>
+                    
+                    <label for="expense-import-input" class="btn btn-outline btn-import">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 0.5rem;">
+                            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                            <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                        </svg>
+                        Choose File
+                    </label>
+                    <input 
+                        type="file" 
+                        id="expense-import-input" 
+                        accept=".csv,.json" 
+                        style="display: none;"
+                    >
+                    
+                    <div class="import-formats">
+                        <small>Supported: CSV, JSON</small>
+                    </div>
+                    
+                    <div id="import-status" class="import-status-message" style="display: none;"></div>
+                </div>
+            </div>
         </aside>
 
         <!-- Expenses Management -->

@@ -146,6 +146,63 @@
         </div>
     </main>
 
+    <!-- Welcome Modal -->
+    <div id="welcomeModal" class="modal" style="display: none;">
+        <div class="modal-content welcome-modal">
+            <div class="welcome-header">
+                <h2>Welcome to Your Personal Finance Tracker! 🎉</h2>
+                <p class="welcome-subtitle">Let's get started with managing your finances</p>
+            </div>
+            
+            <div class="welcome-body">
+                <p class="welcome-message">
+                    It looks like this is your first time here. You can start by importing your existing expense data or begin tracking new expenses right away.
+                </p>
+                
+                <div class="welcome-options">
+                    <div class="import-section">
+                        <h3>Import Existing Data</h3>
+                        <p>Have expense data in CSV or JSON format? Import it to get started quickly.</p>
+                        
+                        <div class="import-buttons">
+                            <label for="welcomeFileInput" class="btn btn-primary import-btn">
+                                <i class="fas fa-file-import"></i>
+                                Choose File to Import
+                            </label>
+                            <input type="file" id="welcomeFileInput" accept=".csv,.json" style="display: none;">
+                            
+                            <div class="import-info">
+                                <small>Supported formats: CSV, JSON</small>
+                            </div>
+                        </div>
+                        
+                        <div id="importStatus" class="import-status" style="display: none;"></div>
+                    </div>
+                    
+                    <div class="divider">
+                        <span>OR</span>
+                    </div>
+                    
+                    <div class="start-fresh-section">
+                        <h3>Start Fresh</h3>
+                        <p>Ready to start tracking? Add your first expense manually.</p>
+                        
+                        <a href="expenses.html" class="btn btn-success">
+                            <i class="fas fa-plus-circle"></i>
+                            Add Your First Expense
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="skip-section">
+                    <button id="skipWelcome" class="btn-text">
+                        Skip for now
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <div class="footer-content">
             <p>&copy; 2025 Personal Finance Tracker</p>
