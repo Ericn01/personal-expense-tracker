@@ -217,25 +217,17 @@ header {
     margin: 0;
 }
 
-.chart-container {
+.chart-container,
+.chart-container canvas {
     position: relative;
     height: 300px;
     width: 100%;
-}
-
-.chart-container canvas {
-    max-height: 300px !important;
-    height: 300px !important;
 }
 
 .chart-container.lg {
     height: 400px;
 }
 
-.chart-container.lg canvas {
-    max-height: 400px !important;
-    height: 400px !important;
-}
 
 .chart-placeholder {
     display: flex;
@@ -264,11 +256,42 @@ footer {
 .footer-content {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 1.5rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
+
+.footer-actions {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.footer-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: var(--border-radius-sm);
+    color: var(--info-color);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.footer-action-btn:hover {
+    color: var(--primary-color);
+    background-color: var(--background);
+    border-color: var(--border-color);
+}
+
 
 .footer-links {
     display: flex;

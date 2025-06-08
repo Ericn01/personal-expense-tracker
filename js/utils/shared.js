@@ -7,7 +7,7 @@ export const expenseList = stateManager.expenseList;
 
 // Factory functions for managers
 export function initializeBudgetManager() {
-    const budgetContainer = document.querySelector('#budget-list') || document.querySelector('#budget-grid');
+    const budgetContainer = document.querySelector('#budget-grid') || document.querySelector("#budget-overview");
     return stateManager.initializeBudgetManager(budgetContainer);
 }
 
