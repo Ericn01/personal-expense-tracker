@@ -188,7 +188,7 @@ export class BudgetManager {
                 </div>
                 <div class="progress-bar">
                     <div class="progress-fill ${this.getProgressClass(percentage)}" 
-                         style="width: ${Math.min(percentage, 100)}%"></div>
+                        style="width: ${Math.min(percentage, 100)}%"></div>
                 </div>
             </div>
         `;
