@@ -48,6 +48,7 @@ export async function handleExpenseImport(event, options = {}) {
         // Add all expenses using stateManager
         let successCount = 0;
         importedExpenses.forEach(expenseData => {
+            console.log(expenseData)
             try {
                 const expense = new Expense(
                     expenseData.amount,
@@ -79,7 +80,7 @@ export async function handleExpenseImport(event, options = {}) {
         if (onSuccess && typeof onSuccess === 'function') {
             onSuccess(successCount);
         }
-        
+
         // Hide status after 5 seconds
         if (statusEl) {
             setTimeout(() => {

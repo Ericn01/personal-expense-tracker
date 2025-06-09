@@ -297,7 +297,7 @@ function updateRecentActivity() {
     // Get all expenses sorted by date, not just monthly
     const recentExpenses = expenseList.expenses
         .sort((a, b) => new Date(b.date) - new Date(a.date))
-        .slice(0, 5);
+        .slice(0, 3); // Retrieve the last three expenses
     
     recentContainer.innerHTML = '';
     
@@ -333,7 +333,13 @@ function updateBudgetSummary(stats, budgets) {
     
     budgetOverview.innerHTML = '';
     
-    const activeBudgets = Object.entries(budgets).filter(([, budget]) => budget > 0);
+    const activeBudgets = Object.entries(budgets)
+    .filter(([, budget]) => budget > 0)
+    .map(([category, budget]) => {
+        const spent = stats.categoryTotals[category.toLowerCase()] || 0;
+        const percentage = Math.min((spent / budget) * 100, 100);
+        return {category, budget, spent, percentage}
+    });
     
     if (activeBudgets.length === 0) {
         budgetOverview.innerHTML = `
@@ -343,12 +349,16 @@ function updateBudgetSummary(stats, budgets) {
         `;
         return;
     }
+
+    // Sort by percentage used (highest first) and take top 3
+    const topBudgets = activeBudgets
+        .sort((a, b) => b.percentage - a.percentage)
+        .slice(0, 3);
     
-    activeBudgets.forEach(([category, budget]) => {
-        const spent = stats.categoryTotals[category.toLowerCase()] || 0;
-        const percentage = Math.min((spent / budget) * 100, 100);
+    // Render top 3 budget progress items
+    topBudgets.forEach(({ category, budget, spent, percentage }) => {
         const remaining = Math.max(budget - spent, 0);
-        
+
         const progressItem = document.createElement('div');
         progressItem.className = 'budget-progress-item';
         progressItem.innerHTML = `
@@ -357,8 +367,8 @@ function updateBudgetSummary(stats, budgets) {
                 <span class="progress-amount">${formatCurrency(spent)} / ${formatCurrency(budget)}</span>
             </div>
             <div class="progress-bar">
-                <div class="progress-fill ${percentage >= 100 ? 'over-budget' : percentage >= 90 ? 'warning' : 'normal'}" 
-                     style="width: ${percentage}%"></div>
+                <div class="progress-fill ${percentage >= 100 ? 'over-budget' : percentage >= 90 ? 'warning' : 'normal'}"
+                    style="width: ${percentage}%"></div>
             </div>
             <div class="progress-footer">
                 <span class="progress-percentage">${percentage.toFixed(0)}% used</span>

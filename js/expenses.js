@@ -10,6 +10,15 @@ import {
     exportToCSV,
     debounce
 } from './utils/shared.js';
+import stateManager from "./models/StateManager.js";
+
+
+// Hook into state events
+stateManager.on("expenseUpdate", () => {
+    updateExpensesDisplay();
+    updateQuickStats(); // or anything else that reflects expense data
+});
+
 
 // Global variables
 const expenseList = new ExpenseList();
@@ -100,19 +109,17 @@ function setupEventListeners() {
     }
 
     // Import listener
-    const importInput = document.getElementById('expense-import-input');
-    if (importInput) {
-    importInput.addEventListener('change', (event) => {
-        handleExpenseImport(event, {
-            statusElementId: 'import-status',
-            onSuccess: (count) => {
-                // Update displays after successful import
-                updateExpensesDisplay();
-                updateQuickStats();
-            }
+    const importLabel = document.querySelector('label[for="footer-import-input"]');
+    const fileInput = document.getElementById('expense-import-input');
+
+    if (importLabel && fileInput) {
+        importLabel.addEventListener('click', (e) => {
+            e.preventDefault(); // prevent label default behavior
+            fileInput.click();  // trigger file input
         });
-    });
-}
+
+        fileInput.addEventListener('change', handleExpenseImport);
+    }
     
     // Modal events
     setupModalEvents();
@@ -139,13 +146,13 @@ function handleFormSubmit(e) {
     try {
         if (editingId) {
             // Update existing expense
-            expenseList.modifyExpense(editingId, expenseData);
+            stateManager.updateExpense(editingId, expenseData);
             showNotification('Expense updated successfully!', 'success');
             resetForm();
         } else {
             // Add new expense
             const newExpense = new Expense(...Object.values(expenseData));
-            expenseList.addExpense(newExpense);
+            stateManager.addExpense(newExpense);
             showNotification('Expense added successfully!', 'success');
         }
         
@@ -185,7 +192,7 @@ function validateFormData(data) {
     return true;
 }
 
-function updateExpensesDisplay() {
+export function updateExpensesDisplay() {
     let expenses = [...expenseList.expenses];
     
     // Apply current filter
@@ -278,7 +285,7 @@ function renderExpensesTable(expenses) {
         row.innerHTML = `
             <td>
                 <input type="checkbox" class="expense-checkbox" data-id="${expense.id}" 
-                       ${selectedExpenses.has(expense.id) ? 'checked' : ''}>
+                    ${selectedExpenses.has(expense.id) ? 'checked' : ''}>
             </td>
             <td class="date-cell">${formatDate(expense.date)}</td>
             <td>
@@ -550,7 +557,7 @@ function handleBulkDelete() {
     }
 }
 
-function updateQuickStats() {
+export function updateQuickStats() {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const weekStart = new Date(today);
