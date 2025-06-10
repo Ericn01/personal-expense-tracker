@@ -2,11 +2,13 @@
 import { ExpenseList } from "./ExpenseList.js";
 import { BudgetManager } from "./BudgetManager.js";
 import { MonthNavigator } from "./MonthNavigator.js";
+import { ThemeManager } from "./ThemeManager.js";
 
 class StateManager {
     constructor() {
         // Core data
         this.expenseList = new ExpenseList();
+        this.themeManager = new ThemeManager();
         this.budgetManager = null;
         this.monthNavigator = null;
         
