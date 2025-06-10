@@ -19,6 +19,7 @@ let spendingChart = null;
 let categoryChart = null;
 let weeklyChart = null;
 let chartsInitialized = false;
+let additionalChartsInitialized = false;
 
 // Dashboard state
 let dashboardData = {
@@ -34,6 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await initializeDashboard();
         updateDashboard();
         setupPeriodicUpdates();
+        initializeChartToggle();
     } catch (error) {
         console.error('Error initializing dashboard:', error);
         showFallbackContent();
@@ -367,7 +369,8 @@ function updateBudgetSummary(stats, budgets) {
             </div>
             <div class="progress-bar">
                 <div class="progress-fill ${percentage >= 100 ? 'danger' : percentage >= 80 ? 'warning' : 'good'}"
-                    style="width: ${percentage}%"></div>
+                    style="width: ${Math.min(percentage, 100)}%">
+                </div>
             </div>
             <div class="progress-footer">
                 <span class="progress-percentage ${percentage > 100 ? "font-bold" : ""}"> ${percentage}% used</span>
@@ -387,29 +390,27 @@ function initializeCharts() {
     }
     
     const spendingCanvas = document.getElementById('spendingTrendChart');
-    const categoryCanvas = document.getElementById('categoryChart');
-    const weeklyCanvas = document.getElementById('weeklyChart');
     
-    if (!spendingCanvas || !categoryCanvas || !weeklyCanvas) {
-        console.warn('Chart canvases not found in DOM');
+    if (!spendingCanvas) {
+        console.warn('Primary chart canvas not found in DOM');
         return;
     }
     
-    // Initialize charts
+    // Initialize only the primary chart initially
     try {
         initializeSpendingTrendChart();
-        initializeCategoryChart();
-        initializeWeeklyChart();
         chartsInitialized = true;
         
-        // Update charts with current data
+        // Update primary chart with current data
         const stats = calculateSpendingStats(dashboardData.expenses, dashboardData.budgets);
-        updateCharts(stats);
+        updateSpendingTrendChart();
+        
     } catch (error) {
-        console.error('Error initializing charts:', error);
+        console.error('Error initializing primary chart:', error);
         showChartPlaceholders();
     }
 }
+
 
 function initializeSpendingTrendChart() {
     const spendingCtx = document.getElementById('spendingTrendChart');
@@ -591,9 +592,19 @@ function updateCharts(stats) {
     if (!chartsInitialized || typeof Chart === 'undefined') return;
     
     try {
+        // Always update the primary chart
         updateSpendingTrendChart();
-        updateCategoryChart(stats);
-        updateWeeklyChart();
+        
+        // Only update additional charts if they're initialized and visible
+        if (additionalChartsInitialized) {
+            const additionalCharts = document.getElementById('additionalCharts');
+            const isExpanded = additionalCharts && additionalCharts.classList.contains('expanded');
+            
+            if (isExpanded) {
+                updateCategoryChart(stats);
+                updateWeeklyChart();
+            }
+        }
     } catch (error) {
         console.error('Error updating charts:', error);
     }
@@ -710,6 +721,18 @@ function showFallbackContent() {
     }
 }
 
+// Add resize function for chart responsiveness
+window.resizeCharts = function() {
+    setTimeout(() => {
+        if (spendingChart) spendingChart.resize();
+        if (additionalChartsInitialized) {
+            if (categoryChart) categoryChart.resize();
+            if (weeklyChart) weeklyChart.resize();
+        }
+    }, 100);
+};
+
+
 function setupPeriodicUpdates() {
     // Update dashboard every 60 seconds
     setInterval(() => {
@@ -723,11 +746,9 @@ function setupPeriodicUpdates() {
     
     // Update on resize to redraw charts
     window.addEventListener('resize', () => {
-        setTimeout(() => {
-            if (spendingChart) spendingChart.resize();
-            if (categoryChart) categoryChart.resize();
-            if (weeklyChart) weeklyChart.resize();
-        }, 300);
+        if (typeof resizeCharts === 'function') {
+            resizeCharts();
+        }
     });
 }
 
@@ -742,6 +763,31 @@ window.showSettings = function() {
     alert('Settings panel coming soon!');
 };
 
+window.initializeAdditionalCharts = function() {
+    if (additionalChartsInitialized) return;
+    
+    const categoryCanvas = document.getElementById('categoryChart');
+    const weeklyCanvas = document.getElementById('weeklyChart');
+    
+    if (!categoryCanvas || !weeklyCanvas) {
+        console.warn('Additional chart canvases not found in DOM');
+        return;
+    }
+    
+    try {
+        initializeCategoryChart();
+        initializeWeeklyChart();
+        additionalChartsInitialized = true;
+        
+        // Update additional charts with current data
+        const stats = calculateSpendingStats(dashboardData.expenses, dashboardData.budgets);
+        updateCategoryChart(stats);
+        updateWeeklyChart();
+        
+    } catch (error) {
+        console.error('Error initializing additional charts:', error);
+    }
+};
 
 // Welcome Modal Implementation
 document.addEventListener('DOMContentLoaded', function() {
@@ -810,4 +856,37 @@ function closeWelcomeModal() {
         // Mark as seen
         localStorage.setItem('hasSeenWelcome', 'true');
     }
+}
+
+function initializeChartToggle () {
+    const toggle = document.getElementById('chartsToggle');
+    const additionalCharts = document.getElementById('additionalCharts');
+    const expandIcon = toggle.querySelector('.expand-icon');
+    const toggleText = toggle.querySelector('span');
+    
+    let isExpanded = false;
+
+    toggle.addEventListener('click', function() {
+        isExpanded = !isExpanded;
+        
+        if (isExpanded) {
+            additionalCharts.classList.remove('collapsed');
+            additionalCharts.classList.add('expanded');
+            expandIcon.classList.add('rotated');
+            toggleText.textContent = 'Show Less Charts';
+            
+            // Initialize additional charts if they haven't been initialized yet
+            // This prevents unnecessary chart rendering when collapsed
+            setTimeout(() => {
+                if (typeof initializeAdditionalCharts === 'function') {
+                    initializeAdditionalCharts();
+                }
+            }, 300);
+        } else {
+            additionalCharts.classList.remove('expanded');
+            additionalCharts.classList.add('collapsed');
+            expandIcon.classList.remove('rotated');
+            toggleText.textContent = 'Show More Charts';
+        }
+    });
 }

@@ -87,9 +87,8 @@
 .budget-progress-item {
     margin-bottom: 0.5rem;
     padding: 0.25rem;
-    background: var(--background);
-    border-radius: var(--border-radius-sm);
     transition: var(--transition);
+    border-bottom: 1px solid var(--border-color)
 }
 
 .budget-progress-item:first-child{
@@ -98,6 +97,7 @@
 
 .budget-progress-item:last-child {
     margin-bottom: 0;
+    border-bottom: none;
 }
 
 .progress-header {
