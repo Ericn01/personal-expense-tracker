@@ -40,18 +40,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+// In dashboard.js
 async function initializeDashboard() {
-    // Initialize managers
     budgetManager = initializeBudgetManager();
     monthNavigator = initializeMonthNavigator(updateDashboard);
     
-    // Initialize charts immediately if Chart.js is available
+    // Wait for Chart.js before initializing charts
     if (typeof Chart !== 'undefined') {
         requestAnimationFrame(() => {
             initializeCharts();
         });
     } else {
-        // Wait for Chart.js to load
         await waitForChartJS();
         initializeCharts();
     }
@@ -80,7 +79,7 @@ function updateDashboard() {
         const monthlyExpenses = expenseList.expenses.filter(expense => {
             const expenseDate = new Date(expense.date);
             return expenseDate.getMonth() === currentMonth && 
-                   expenseDate.getFullYear() === currentYear;
+                expenseDate.getFullYear() === currentYear;
         });
         
         // Get budgets for current month
@@ -337,7 +336,7 @@ function updateBudgetSummary(stats, budgets) {
     .filter(([, budget]) => budget > 0)
     .map(([category, budget]) => {
         const spent = stats.categoryTotals[category.toLowerCase()] || 0;
-        const percentage = Math.min((spent / budget) * 100, 100);
+        const percentage = Math.round((spent / budget) * 100, 2);
         return {category, budget, spent, percentage}
     });
     
@@ -353,12 +352,12 @@ function updateBudgetSummary(stats, budgets) {
     // Sort by percentage used (highest first) and take top 3
     const topBudgets = activeBudgets
         .sort((a, b) => b.percentage - a.percentage)
-        .slice(0, 3);
+        .slice(0, 4);
     
     // Render top 3 budget progress items
     topBudgets.forEach(({ category, budget, spent, percentage }) => {
         const remaining = Math.max(budget - spent, 0);
-
+        const overBudget = (budget - spent) < 0;
         const progressItem = document.createElement('div');
         progressItem.className = 'budget-progress-item';
         progressItem.innerHTML = `
@@ -367,12 +366,12 @@ function updateBudgetSummary(stats, budgets) {
                 <span class="progress-amount">${formatCurrency(spent)} / ${formatCurrency(budget)}</span>
             </div>
             <div class="progress-bar">
-                <div class="progress-fill ${percentage >= 100 ? 'over-budget' : percentage >= 90 ? 'warning' : 'normal'}"
+                <div class="progress-fill ${percentage >= 100 ? 'danger' : percentage >= 80 ? 'warning' : 'good'}"
                     style="width: ${percentage}%"></div>
             </div>
             <div class="progress-footer">
-                <span class="progress-percentage">${percentage.toFixed(0)}% used</span>
-                <span class="progress-remaining">${formatCurrency(remaining)} remaining</span>
+                <span class="progress-percentage ${percentage > 100 ? "font-bold" : ""}"> ${percentage}% used</span>
+                <span class="progress-remaining">${overBudget ? `<strong class="text-danger"> 🛑 ${formatCurrency(Math.abs(budget - spent))} over budget </strong>` : `${formatCurrency(remaining)} remaining`} </span>
             </div>
         `;
         budgetOverview.appendChild(progressItem);
@@ -712,12 +711,12 @@ function showFallbackContent() {
 }
 
 function setupPeriodicUpdates() {
-    // Update dashboard every 10 seconds
+    // Update dashboard every 60 seconds
     setInterval(() => {
         if (document.visibilityState === 'visible') {
             updateDashboard();
         }
-    }, 10 * 1000);
+    }, 60 * 1000);
     
     // Update on window focus
     window.addEventListener('focus', updateDashboard);

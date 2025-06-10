@@ -412,7 +412,6 @@ function updateBudgetPerformance(reportData) {
     if (!container) return;
     
     // This would integrate with budget data if available
-    // For now, show a simple message
     container.innerHTML = `
         <div class="insight-item">
             📊 Budget performance analysis will be available when budgets are set.
@@ -450,9 +449,6 @@ window.exportReport = function(format) {
         case 'pdf':
             showNotification('PDF export coming soon!', 'info');
             break;
-        case 'excel':
-            showNotification('Excel export coming soon!', 'info');
-            break;
         default:
             showNotification('Export format not supported', 'error');
     }
@@ -474,12 +470,6 @@ window.shareReport = function() {
         });
     }
 };
-
-// Additional CSS for reports page
-const reportStyles = `
-
-`;
-
 
 // Initialize reports page
 document.addEventListener('DOMContentLoaded', () => {

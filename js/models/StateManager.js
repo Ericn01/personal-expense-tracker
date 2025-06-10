@@ -208,7 +208,7 @@ class StateManager {
         this.expenseList.removeExpense(id);
     }
     
-    // Budget operations
+    // Budget operations4
     setBudget(category, amount) {
         if (this.budgetManager) {
             this.budgetManager.setBudget(category, amount);

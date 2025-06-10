@@ -203,8 +203,8 @@ export class BudgetManager {
         return expenseList.expenses.filter(expense => {
             const expenseDate = new Date(expense.date);
             return expenseDate.getMonth() === this.currentMonth &&
-                   expenseDate.getFullYear() === this.currentYear &&
-                   expense.category.toLowerCase() === category.toLowerCase();
+                    expenseDate.getFullYear() === this.currentYear &&
+                    expense.category.toLowerCase() === category.toLowerCase();
         });
     }
     

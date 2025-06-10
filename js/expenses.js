@@ -1,5 +1,4 @@
-// expenses.js - Expense management functionality
-import { ExpenseList } from "./models/ExpenseList.js";
+// expenses.js - Fixed expense management functionality
 import { Expense } from "./models/Expense.js";
 import { populateCategoryDropdown } from "./utils/categories.js";
 import { handleExpenseImport } from "./utils/importer.js";
@@ -12,16 +11,7 @@ import {
 } from './utils/shared.js';
 import stateManager from "./models/StateManager.js";
 
-
-// Hook into state events
-stateManager.on("expenseUpdate", () => {
-    updateExpensesDisplay();
-    updateQuickStats(); // or anything else that reflects expense data
-});
-
-
 // Global variables
-const expenseList = new ExpenseList();
 let editingId = null;
 let currentFilter = null;
 let sortOrder = 'date-desc';
@@ -31,6 +21,7 @@ let selectedExpenses = new Set();
 document.addEventListener('DOMContentLoaded', () => {
     initializeExpensePage();
     setupEventListeners();
+    setupStateListeners();
     updateExpensesDisplay();
     updateQuickStats();
 });
@@ -38,9 +29,14 @@ document.addEventListener('DOMContentLoaded', () => {
 function initializeExpensePage() {
     // Set today's date as default
     const dateInput = document.getElementById('date');
+    const todayDateValue = (new Date()).toISOString().split("T")[0];
+    console.log(todayDateValue)
     if (dateInput) {
         dateInput.valueAsDate = new Date();
     }
+
+    // Disable input dates past today for new expenses
+    dateInput.setAttribute("max", todayDateValue);
     
     // Populate category dropdowns
     const categoryDropdowns = [
@@ -51,12 +47,29 @@ function initializeExpensePage() {
     categoryDropdowns.forEach(dropdown => {
         if (dropdown) populateCategoryDropdown(dropdown);
     });
-    
+
     // Initialize search debounce
     const searchInput = document.getElementById('expense-search');
     if (searchInput) {
         searchInput.addEventListener('input', debounce(handleSearch, 300));
     }
+}
+
+function setupStateListeners() {
+    // Listen for state changes from StateManager
+    stateManager.on('expenseUpdate', handleStateExpenseUpdate);
+    stateManager.on('stateChange', handleStateChange);
+}
+
+function handleStateExpenseUpdate(data) {
+    // Update display when expenses change from any source
+    updateExpensesDisplay();
+    updateQuickStats();
+}
+
+function handleStateChange(state) {
+    // Handle any other state changes if needed
+    console.log('State changed:', state);
 }
 
 function setupEventListeners() {
@@ -108,17 +121,28 @@ function setupEventListeners() {
         closeFormBtn.addEventListener('click', resetForm);
     }
 
-    // Import listener
-    const importLabel = document.querySelector('label[for="footer-import-input"]');
+    // Import listener - Fixed to use the shared importer properly
+    const importLabel = document.querySelector('.footer-action-btn');
     const fileInput = document.getElementById('expense-import-input');
 
     if (importLabel && fileInput) {
         importLabel.addEventListener('click', (e) => {
-            e.preventDefault(); // prevent label default behavior
-            fileInput.click();  // trigger file input
+            e.preventDefault();
+            fileInput.click();
         });
 
-        fileInput.addEventListener('change', handleExpenseImport);
+        fileInput.addEventListener('change', (event) => {
+            handleExpenseImport(event, {
+                statusElementId: 'import-status',
+                onSuccess: (count) => {
+                    // StateManager will handle the update via events
+                    console.log(`Successfully imported ${count} expenses`);
+                },
+                onError: (error) => {
+                    console.error('Import failed:', error);
+                }
+            });
+        });
     }
     
     // Modal events
@@ -145,22 +169,22 @@ function handleFormSubmit(e) {
     
     try {
         if (editingId) {
-            // Update existing expense
+            // Update existing expense using StateManager
             stateManager.updateExpense(editingId, expenseData);
             showNotification('Expense updated successfully!', 'success');
             resetForm();
         } else {
-            // Add new expense
+            // Add new expense using StateManager
             const newExpense = new Expense(...Object.values(expenseData));
             stateManager.addExpense(newExpense);
             showNotification('Expense added successfully!', 'success');
         }
         
-        // Reset form and update displays
+        // Reset form
         e.target.reset();
         document.getElementById('date').valueAsDate = new Date();
-        updateExpensesDisplay();
-        updateQuickStats();
+        
+        // StateManager will trigger updates via events
         
     } catch (error) {
         showNotification('Error saving expense. Please try again.', 'error');
@@ -193,7 +217,8 @@ function validateFormData(data) {
 }
 
 export function updateExpensesDisplay() {
-    let expenses = [...expenseList.expenses];
+    // Get expenses from StateManager instead of local instance
+    let expenses = [...stateManager.expenseList.expenses];
     
     // Apply current filter
     if (currentFilter) {
@@ -333,8 +358,12 @@ function attachTableEventListeners() {
 }
 
 function editExpense(id) {
-    const expense = expenseList.expenses.find(exp => exp.id === id);
-    if (!expense) return;
+    // Get expense from StateManager
+    const expense = stateManager.expenseList.expenses.find(exp => exp.id === id);
+    if (!expense) {
+        showNotification('Expense not found', 'error');
+        return;
+    }
     
     // Populate form
     document.getElementById('amount').value = expense.amount;
@@ -394,12 +423,12 @@ function showDeleteModal(id) {
 
 function deleteExpense(id) {
     try {
-        expenseList.removeExpense(id);
+        // Use StateManager to delete expense
+        stateManager.deleteExpense(id);
         selectedExpenses.delete(id);
         showNotification('Expense deleted successfully!', 'success');
-        updateExpensesDisplay();
-        updateQuickStats();
         updateBulkDeleteButton();
+        // StateManager will trigger updates via events
     } catch (error) {
         showNotification('Error deleting expense. Please try again.', 'error');
         console.error('Error deleting expense:', error);
@@ -535,13 +564,11 @@ function handleBulkDelete() {
     if (confirm(confirmMessage)) {
         try {
             selectedExpenses.forEach(id => {
-                expenseList.removeExpense(id);
+                stateManager.deleteExpense(id);
             });
             
             selectedExpenses.clear();
             showNotification(`Successfully deleted ${count} expense${count > 1 ? 's' : ''}!`, 'success');
-            updateExpensesDisplay();
-            updateQuickStats();
             updateBulkDeleteButton();
             
             // Reset select all checkbox
@@ -550,6 +577,7 @@ function handleBulkDelete() {
                 selectAllCheckbox.checked = false;
                 selectAllCheckbox.indeterminate = false;
             }
+            // StateManager will trigger updates via events
         } catch (error) {
             showNotification('Error deleting expenses. Please try again.', 'error');
             console.error('Error in bulk delete:', error);
@@ -558,6 +586,9 @@ function handleBulkDelete() {
 }
 
 export function updateQuickStats() {
+    // Use StateManager's expense list
+    const expenses = stateManager.expenseList.expenses;
+    
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const weekStart = new Date(today);
@@ -565,7 +596,7 @@ export function updateQuickStats() {
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     
     // Today's spending
-    const todaySpending = expenseList.expenses
+    const todaySpending = expenses
         .filter(expense => {
             const expenseDate = new Date(expense.date);
             return expenseDate >= today && expenseDate < new Date(today.getTime() + 24 * 60 * 60 * 1000);
@@ -573,12 +604,12 @@ export function updateQuickStats() {
         .reduce((sum, expense) => sum + expense.amount, 0);
     
     // This week's spending
-    const weekSpending = expenseList.expenses
+    const weekSpending = expenses
         .filter(expense => new Date(expense.date) >= weekStart)
         .reduce((sum, expense) => sum + expense.amount, 0);
     
     // This month's spending
-    const monthSpending = expenseList.expenses
+    const monthSpending = expenses
         .filter(expense => new Date(expense.date) >= monthStart)
         .reduce((sum, expense) => sum + expense.amount, 0);
     
@@ -596,8 +627,9 @@ export function updateQuickStats() {
 }
 
 function updateFooterStats() {
-    const totalCount = expenseList.expenses.length;
-    const totalAmount = expenseList.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+    const expenses = stateManager.expenseList.expenses;
+    const totalCount = expenses.length;
+    const totalAmount = expenses.reduce((sum, expense) => sum + expense.amount, 0);
     
     const countEl = document.getElementById('total-expenses-count');
     const amountEl = document.getElementById('total-expenses-amount');
@@ -609,7 +641,7 @@ function updateFooterStats() {
 function updateResultsCount(count) {
     const resultsEl = document.getElementById('results-count');
     if (resultsEl) {
-        const total = expenseList.expenses.length;
+        const total = stateManager.expenseList.expenses.length;
         if (count === total) {
             resultsEl.textContent = `Showing ${count} expense${count !== 1 ? 's' : ''}`;
         } else {
@@ -660,7 +692,8 @@ window.focusForm = function() {
 };
 
 window.exportExpenses = function() {
-    let expenses = [...expenseList.expenses];
+    // Use StateManager's expense list
+    let expenses = [...stateManager.expenseList.expenses];
     
     // Apply current filter if any
     if (currentFilter) {
