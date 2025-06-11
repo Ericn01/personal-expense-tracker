@@ -801,3 +801,221 @@
         justify-content: center;
     }
 }
+
+@media (max-width: 600px) {
+    .dashboard-container {
+        padding: 0.5rem;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    .dashboard-header,
+    .budget-card-header,
+    .progress-header,
+    .progress-details {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 0.5rem;
+    }
+
+    .progress-details {
+        gap: 0.25rem;
+    }
+
+    .section-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    .section-actions .btn {
+        width: 100%;
+        justify-content: center;
+        font-size: 0.875rem;
+    }
+    
+    .dashboard-title {
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .activity-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 0.75rem;
+    }
+   
+    .activity-details {
+        align-items: flex-start;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+        font-size: 0.875rem;
+    }
+
+    .template-cards,
+    .summary-grid,
+    .export-options {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+   
+    .summary-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 0.75rem;
+    }
+
+    .date-inputs {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+   
+    .quick-periods {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .quick-periods .btn {
+        flex: 1;
+        min-width: calc(50% - 0.25rem);
+        font-size: 0.8rem;
+    }
+    /* EXPENSES PAGE FIXES: Prevent overflow */
+    .expenses-layout {
+        display: block;
+        margin: 0.5rem;
+        padding: 0.5rem;
+        max-width: calc(100vw - 1rem);
+        overflow-x: hidden;
+    }
+    
+    .expenses-layout > * {
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 1rem;
+        box-sizing: border-box;
+    }
+    
+    /* Fix add expense, quick stats, and filter sections */
+    .add-expense-card,
+    .expenses-stats,
+    .expenses-filters {
+        width: 100%;
+        max-width: 100%;
+        padding: 0.75rem;
+        box-sizing: border-box;
+        overflow-x: hidden;
+    }
+    
+    .expenses-filters .form-group {
+        margin-bottom: 0.75rem;
+    }
+    
+    .expenses-filters input,
+    .expenses-filters select {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* DASHBOARD REFINEMENTS */
+    .dashboard-layout {
+        margin: 0.5rem;
+        padding: 0.5rem;
+        max-width: calc(100vw - 1rem);
+    }
+    
+    /* Ensure month navigation stays compact */
+    .month-navigation {
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .month-navigation .btn {
+        min-width: 35px;
+        padding: 0.375rem;
+        font-size: 0.8rem;
+    }
+    
+    .current-month-display {
+        font-size: 0.9rem;
+        padding: 0 0.5rem;
+    }
+    
+    /* 2x2 grid adjustments for very small screens */
+    .overview-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+    
+    .overview-grid .card {
+        padding: 0.5rem;
+        min-height: auto;
+    }
+    
+    .overview-grid .card h3 {
+        font-size: 0.8rem;
+        margin-bottom: 0.25rem;
+        line-height: 1.2;
+    }
+    
+    .overview-grid .card .amount,
+    .overview-grid .card .stat-value {
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    
+    .overview-grid .card p,
+    .overview-grid .card .stat-label {
+        font-size: 0.7rem;
+        line-height: 1.1;
+    }
+    
+    /* BUDGETS PAGE: Show only specified sections */
+    .budgets-layout {
+        margin: 0.5rem;
+        padding: 0.5rem;
+        max-width: calc(100vw - 1rem);
+    }
+    
+    /* Hide unnecessary budget sections on mobile */
+    .budget-overview,
+    .budget-analysis,
+    .budget-history,
+    .budget-settings {
+        display: none;
+    }
+    
+    /* Keep only month navigator, quick templates, and category budgets */
+    .month-navigation,
+    .budget-templates,
+    .category-budgets {
+        display: block;
+        margin-bottom: 1rem;
+    }
+    
+    /* General mobile improvements */
+    .card {
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .btn {
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    /* Prevent horizontal scrolling */
+    body {
+        overflow-x: hidden;
+    }
+    
+    * {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+}

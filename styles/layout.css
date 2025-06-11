@@ -443,62 +443,99 @@ footer {
         gap: 1rem;
         padding: 1rem;
     }
-    
+   
     .header-title {
         font-size: 1.5rem;
     }
-    
+   
     .main-nav {
         flex-wrap: wrap;
         justify-content: center;
     }
-    
+   
     .dashboard-layout,
     .expenses-layout,
     .budgets-layout {
         margin: 1rem auto;
         padding: 0 1rem;
+        max-width: 100%;
+        overflow-x: hidden;
     }
-    
+
+    /* DASHBOARD FIXES: Side-by-side month navigation */
     .month-navigation {
-        flex-direction: column;
-        gap: 1rem;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        flex-wrap: nowrap;
     }
     
+    .month-navigation .btn {
+        min-width: 40px;
+        padding: 0.5rem;
+        font-size: 0.875rem;
+    }
+
     .current-month-display {
-        font-size: 1.25rem;
+        font-size: 1rem;
+        flex: 1;
+        text-align: center;
+        min-width: 0;
     }
-    
+   
     .section-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
     }
-    
+   
+    /* DASHBOARD: 2x2 grid for overview cards */
     .overview-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
     }
     
+    .overview-grid .card {
+        padding: 0.75rem;
+    }
+    
+    .overview-grid .card h3 {
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .overview-grid .card .amount,
+    .overview-grid .card .stat-value {
+        font-size: 1rem;
+    }
+    
+    .overview-grid .card p,
+    .overview-grid .card .stat-label {
+        font-size: 0.75rem;
+    }
+   
     .footer-content {
         flex-direction: column;
         gap: 1rem;
         text-align: center;
     }
-    
+   
     .footer-links {
         flex-direction: column;
         gap: 1rem;
     }
-    
+   
     .footer-stats {
         flex-direction: column;
         gap: 0.5rem;
     }
-    
+
     .chart-container {
         height: 250px;
     }
-    
+
     .chart-container canvas {
         max-height: 250px !important;
         height: 250px !important;

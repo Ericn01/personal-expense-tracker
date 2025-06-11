@@ -752,10 +752,6 @@
     transition: var(--transition);
 }
 
-
-
-
-/* ===== RESPONSIVE DARK MODE ===== */
 @media (max-width: 768px) {
     .modal-content {
         margin: 1rem;
@@ -770,11 +766,53 @@
     .btn {
         width: 100%;
         justify-content: center;
+        font-size: 0.875rem;
+        padding: 0.5rem;
     }
     
     .card-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.5rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .modal-content {
+        margin: 0.5rem;
+        width: calc(100% - 1rem);
+        padding: 1rem;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+   
+    .modal-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 0.75rem;
+    }
+    
+    .form-group label {
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 0.875rem;
+        padding: 0.5rem;
+        width: 100%;
+        box-sizing: border-box;
     }
 }

@@ -13,6 +13,10 @@ import { mapUserCategory } from "./categories.js";
 function validateExpenseData(expenseData, lineNumber = null) {
     const errors = [];
     const linePrefix = lineNumber ? `Line ${lineNumber}: ` : '';
+
+    if (stateManager.expenseList.map( exp => exp.id).includes(expenseData.id)){
+        errors.push(`${linePrefix}Expense with ID "${expenseData.id}" already exists`);
+    }
     
     // Validate amount
     if (expenseData.amount === undefined || expenseData.amount === null || expenseData.amount === '') {
