@@ -30,7 +30,7 @@ function initializeExpensePage() {
     // Set today's date as default
     const dateInput = document.getElementById('date');
     const todayDateValue = (new Date()).toISOString().split("T")[0];
-    console.log(todayDateValue)
+
     if (dateInput) {
         dateInput.valueAsDate = new Date();
     }

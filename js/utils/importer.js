@@ -14,7 +14,8 @@ function validateExpenseData(expenseData, lineNumber = null) {
     const errors = [];
     const linePrefix = lineNumber ? `Line ${lineNumber}: ` : '';
 
-    if (stateManager.expenseList.map( exp => exp.id).includes(expenseData.id)){
+    // Validate ID
+    if (stateManager.expenseList.expenses.map( exp => exp.id).includes(expenseData.id)){
         errors.push(`${linePrefix}Expense with ID "${expenseData.id}" already exists`);
     }
     

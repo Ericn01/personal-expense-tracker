@@ -137,6 +137,13 @@
 .trend.negative { color: var(--danger-color); }
 .trend.warning { color: var(--warning-color); }
 
+.no-budget {
+    color: var(--warning-color);
+    font-style: italic;
+    opacity: 0.8;
+}
+
+
 /* ===== EXPENSES PAGE ===== */
 .expense-row {
     transition: var(--transition);
@@ -991,7 +998,6 @@
     }
     
     /* Keep only month navigator, quick templates, and category budgets */
-    .month-navigation,
     .budget-templates,
     .category-budgets {
         display: block;

@@ -126,25 +126,51 @@ function updateOverviewCards(stats) {
     if (totalSpentEl) {
         totalSpentEl.textContent = formatCurrency(stats.totalSpent);
     }
-    
+
     // Remaining Budget
     const remainingBudgetEl = document.querySelector('.remaining-budget');
     if (remainingBudgetEl) {
-        remainingBudgetEl.textContent = formatCurrency(stats.remainingBudget);
+        if (stats.totalBudget > 0) {
+            remainingBudgetEl.textContent = formatCurrency(stats.remainingBudget);
+            remainingBudgetEl.classList.remove('no-budget');
+        } else {
+            remainingBudgetEl.textContent = 'No budget set';
+            remainingBudgetEl.classList.add('no-budget');
+        }
     }
-    
+
     // Average Daily Spending
     const avgSpendingEl = document.querySelector('.average-spending');
     if (avgSpendingEl) {
         avgSpendingEl.textContent = formatCurrency(stats.avgDaily);
     }
-    
+
     // Monthly Goal (Total Budget)
     const monthlyGoalEl = document.querySelector('.monthly-goal');
     if (monthlyGoalEl) {
-        monthlyGoalEl.textContent = formatCurrency(stats.totalBudget);
+        if (stats.totalBudget > 0) {
+            monthlyGoalEl.textContent = formatCurrency(stats.totalBudget);
+            monthlyGoalEl.classList.remove('no-budget');
+        } else {
+            monthlyGoalEl.textContent = 'No budget set';
+            monthlyGoalEl.classList.add('no-budget');
+        }
     }
-    
+
+     // Indicate if viewing a past month
+    const { currentMonth, currentYear } = dashboardData;
+    const now = new Date();
+    const isCurrentMonth = currentMonth === now.getMonth() && currentYear === now.getFullYear();
+    const historicalLabel = document.getElementById('historical-label');
+    if (historicalLabel) {
+        if (!isCurrentMonth) {
+            historicalLabel.style.display = 'block';
+            historicalLabel.textContent = 'Viewing historical data';
+        } else {
+            historicalLabel.style.display = 'none';
+        }
+    }
+
     // Update trends
     updateTrends(stats);
 }
@@ -176,13 +202,17 @@ function updateTrends(stats) {
         spendingTrendEl.textContent = `${arrow} ${sign}${change.toFixed(1)}% from last month`;
         spendingTrendEl.className = `trend ${change > 0 ? 'negative' : 'positive'}`;
     }
-    
+    console.log(stats)
     // Update budget trend
     const budgetTrendEl = document.getElementById('budget-trend');
     if (budgetTrendEl) {
-        const percentage = stats.totalBudget > 0 ? (stats.remainingBudget / stats.totalBudget) * 100 : 0;
-        budgetTrendEl.textContent = `🎯 ${percentage.toFixed(0)}% remaining`;
-        budgetTrendEl.className = `trend ${percentage > 50 ? 'positive' : percentage > 25 ? 'warning' : 'negative'}`;
+        if (stats.totalBudget > 0){
+            const percentage = stats.totalBudget > 0 ? (stats.remainingBudget / stats.totalBudget) * 100 : 0;
+            budgetTrendEl.textContent = `🎯 ${percentage.toFixed(0)}% remaining`;
+            budgetTrendEl.className = `trend ${percentage > 50 ? 'positive' : percentage > 25 ? 'warning' : 'negative'}`;
+        } else{
+            budgetTrendEl.textContent = ''
+        }
     }
     
     // Update daily trend
@@ -210,7 +240,7 @@ function updateTrends(stats) {
                 goalProgressEl.className = 'trend negative';
             }
         } else {
-            goalProgressEl.textContent = '🎯 Set budget first';
+            goalProgressEl.innerHTML = '<a href="budgets.html"> 🎯 Set budget first </a>';
             goalProgressEl.className = 'trend';
         }
     }
@@ -294,23 +324,28 @@ function addSpendingInsights(stats, container) {
 function updateRecentActivity() {
     const recentContainer = document.getElementById('recent-expenses');
     if (!recentContainer) return;
-    
-    // Get all expenses sorted by date, not just monthly
+
+    // Only show last 3 expenses for the selected month
+    const { currentMonth, currentYear } = dashboardData;
     const recentExpenses = expenseList.expenses
+        .filter(expense => {
+            const d = new Date(expense.date);
+            return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+        })
         .sort((a, b) => new Date(b.date) - new Date(a.date))
-        .slice(0, 3); // Retrieve the last three expenses
-    
+        .slice(0, 3);
+
     recentContainer.innerHTML = '';
-    
+
     if (recentExpenses.length === 0) {
         recentContainer.innerHTML = `
             <div class="empty-state-small">
-                <p>No recent expenses. <a href="expenses.html">Add your first expense →</a></p>
+                <p>No recent expenses for this month. <a href="expenses.html">Add your first expense →</a></p>
             </div>
         `;
         return;
     }
-    
+
     recentExpenses.forEach(expense => {
         const item = document.createElement('div');
         item.className = 'activity-item';
@@ -327,7 +362,6 @@ function updateRecentActivity() {
         recentContainer.appendChild(item);
     });
 }
-
 function updateBudgetSummary(stats, budgets) {
     const budgetOverview = document.getElementById('budget-overview');
     if (!budgetOverview) return;
