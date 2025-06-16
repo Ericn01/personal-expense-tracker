@@ -417,8 +417,9 @@
 .modal-content {
     background: var(--surface);
     border-radius: var(--border-radius);
-    padding: 2rem;
-    max-width: 500px;
+    padding: 1.5rem;
+    max-width: 550px;
+    max-height: 90vh;
     width: 90%;
     box-shadow: var(--shadow-lg);
     transition: var(--theme-transition);
@@ -431,9 +432,9 @@
 }
 
 .modal-content p {
-    margin: 0 0 2rem 0;
+    margin: 0 0 1rem 0;
     color: var(--text-secondary);
-    line-height: 1.5;
+    line-height: 1.4;
 }
 
 .modal-actions {
@@ -532,11 +533,6 @@
     color: var(--text-secondary);
 }
 
-.empty-state a {
-    color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 500;
-}
 
 .empty-state a:hover {
     text-decoration: underline;
@@ -593,6 +589,7 @@
 
 /* Welcome modal section */
 .welcome-modal .welcome-header {
+    border-radius: var(--border-radius-sm);
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
 }
 
@@ -625,20 +622,20 @@
 }
 
 .welcome-body {
-    padding: 2rem;
+    padding: 1rem;
 }
 
 .welcome-message {
     text-align: center;
     color: var(--text-secondary);
-    margin-bottom: 2rem;
+    margin-bottom: 0.5rem;
     font-size: 1.05rem;
     line-height: 1.6;
 }
 
 .welcome-options {
     display: grid;
-    gap: 2rem;
+    gap: 1rem;
 }
 
 .import-section,
@@ -656,7 +653,7 @@
 .import-section p,
 .start-fresh-section p {
     color: var(--text-secondary);
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.75rem;
 }
 
 .import-buttons {

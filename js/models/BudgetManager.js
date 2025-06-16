@@ -232,7 +232,7 @@ export class BudgetManager {
     updateTotal(total) {
         if (this.totalDisplay) {
             const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                               'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             const monthLabel = `${monthNames[this.currentMonth]} ${this.currentYear}`;
             this.totalDisplay.innerHTML = `
                 <span class="total-label">${monthLabel}:</span>

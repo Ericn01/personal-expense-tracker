@@ -208,7 +208,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
 }
 
 .chart-title {
@@ -227,6 +227,15 @@ header {
 
 .chart-container.lg {
     height: 400px;
+}
+
+/* Category chart specific styles */
+
+.categories-breakdown .chart-container{
+    text-align: center;
+}
+#categoryChart{
+    margin: 0 auto;
 }
 
 .chart-placeholder {

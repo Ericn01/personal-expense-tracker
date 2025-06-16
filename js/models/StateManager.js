@@ -29,6 +29,7 @@ class StateManager {
         this.handleBudgetUpdate = this.handleBudgetUpdate.bind(this);
         this.handleMonthChange = this.handleMonthChange.bind(this);
         
+        console.log(this.getState())
         // Initialize
         this.init();
     }

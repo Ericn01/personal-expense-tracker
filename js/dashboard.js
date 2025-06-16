@@ -127,15 +127,32 @@ function updateOverviewCards(stats) {
         totalSpentEl.textContent = formatCurrency(stats.totalSpent);
     }
 
-    // Remaining Budget
+    // Remaining Budget - Improved messaging
     const remainingBudgetEl = document.querySelector('.remaining-budget');
+    const remainingBudgetCard = remainingBudgetEl?.closest('.overview-card');
+    
     if (remainingBudgetEl) {
         if (stats.totalBudget > 0) {
             remainingBudgetEl.textContent = formatCurrency(stats.remainingBudget);
-            remainingBudgetEl.classList.remove('no-budget');
+            remainingBudgetCard?.classList.remove('no-budget');
+            
+            // Add visual indicator for budget status
+            if (stats.remainingBudget < 0) {
+                remainingBudgetCard?.classList.add('over-budget');
+            } else if (stats.remainingBudget < stats.totalBudget * 0.2) {
+                remainingBudgetCard?.classList.add('low-budget');
+            } else {
+                remainingBudgetCard?.classList.remove('over-budget', 'low-budget');
+            }
         } else {
-            remainingBudgetEl.textContent = 'No budget set';
-            remainingBudgetEl.classList.add('no-budget');
+            // Better no-budget state
+            remainingBudgetEl.innerHTML = `
+                <div class="no-budget-state">
+                    <span class="no-budget-text">Set Budget</span>
+                </div>
+            `;
+            remainingBudgetCard?.classList.add('no-budget');
+            remainingBudgetCard?.classList.remove('over-budget', 'low-budget');
         }
     }
 
@@ -145,19 +162,26 @@ function updateOverviewCards(stats) {
         avgSpendingEl.textContent = formatCurrency(stats.avgDaily);
     }
 
-    // Monthly Goal (Total Budget)
+    // Monthly Goal - Improved messaging
     const monthlyGoalEl = document.querySelector('.monthly-goal');
+    const monthlyGoalCard = monthlyGoalEl?.closest('.overview-card');
+    
     if (monthlyGoalEl) {
         if (stats.totalBudget > 0) {
             monthlyGoalEl.textContent = formatCurrency(stats.totalBudget);
-            monthlyGoalEl.classList.remove('no-budget');
+            monthlyGoalCard?.classList.remove('no-budget');
         } else {
-            monthlyGoalEl.textContent = 'No budget set';
-            monthlyGoalEl.classList.add('no-budget');
+            // Better no-budget state with action
+            monthlyGoalEl.innerHTML = `
+                <div class="no-budget-state">
+                    <span class="no-budget-text">Set Budget</span>
+                </div>
+            `;
+            monthlyGoalCard?.classList.add('no-budget');
         }
     }
 
-     // Indicate if viewing a past month
+    // Indicate if viewing a past month
     const { currentMonth, currentYear } = dashboardData;
     const now = new Date();
     const isCurrentMonth = currentMonth === now.getMonth() && currentYear === now.getFullYear();
@@ -202,16 +226,29 @@ function updateTrends(stats) {
         spendingTrendEl.textContent = `${arrow} ${sign}${change.toFixed(1)}% from last month`;
         spendingTrendEl.className = `trend ${change > 0 ? 'negative' : 'positive'}`;
     }
-    console.log(stats)
-    // Update budget trend
+
+    // Improved budget trend
     const budgetTrendEl = document.getElementById('budget-trend');
     if (budgetTrendEl) {
-        if (stats.totalBudget > 0){
-            const percentage = stats.totalBudget > 0 ? (stats.remainingBudget / stats.totalBudget) * 100 : 0;
-            budgetTrendEl.textContent = `🎯 ${percentage.toFixed(0)}% remaining`;
-            budgetTrendEl.className = `trend ${percentage > 50 ? 'positive' : percentage > 25 ? 'warning' : 'negative'}`;
-        } else{
-            budgetTrendEl.textContent = ''
+        if (stats.totalBudget > 0) {
+            const percentage = (stats.remainingBudget / stats.totalBudget) * 100;
+            const isOverBudget = stats.remainingBudget < 0;
+            
+            if (isOverBudget) {
+                budgetTrendEl.textContent = `🚨 ${Math.abs(percentage).toFixed(0)}% over budget`;
+                budgetTrendEl.className = 'trend negative';
+            } else {
+                budgetTrendEl.textContent = `🎯 ${percentage.toFixed(0)}% remaining`;
+                budgetTrendEl.className = `trend ${percentage > 50 ? 'positive' : percentage > 25 ? 'warning' : 'negative'}`;
+            }
+        } else {
+            // Better no-budget trend message
+            budgetTrendEl.innerHTML = `
+                <a href="budgets.html" class="budget-cta">
+                    <span>Set up budget tracking</span>
+                </a>
+            `;
+            budgetTrendEl.className = 'trend no-budget-cta';
         }
     }
     
@@ -220,11 +257,16 @@ function updateTrends(stats) {
     if (dailyTrendEl) {
         const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
         const projectedMonthly = stats.avgDaily * daysInMonth;
-        const icon = projectedMonthly <= stats.totalBudget ? '😊' : '⚠️';
-        dailyTrendEl.textContent = `${icon} ${formatCurrency(projectedMonthly)}/month projected`;
+        
+        if (stats.totalBudget > 0) {
+            const icon = projectedMonthly <= stats.totalBudget ? '😊' : '⚠️';
+            dailyTrendEl.textContent = `${icon} ${formatCurrency(projectedMonthly)}/month projected`;
+        } else {
+            dailyTrendEl.textContent = `📊 ${formatCurrency(projectedMonthly)}/month projected`;
+        }
     }
     
-    // Update goal progress
+    // Improved goal progress with better messaging
     const goalProgressEl = document.getElementById('goal-progress');
     if (goalProgressEl) {
         if (stats.totalBudget > 0) {
@@ -235,13 +277,21 @@ function updateTrends(stats) {
             } else if (percentage <= 90) {
                 goalProgressEl.textContent = '⚠️ Watch spending';
                 goalProgressEl.className = 'trend warning';
+            } else if (percentage <= 100) {
+                goalProgressEl.textContent = '🔥 Almost at limit';
+                goalProgressEl.className = 'trend negative';
             } else {
                 goalProgressEl.textContent = '🛑 Over budget';
-                goalProgressEl.className = 'trend negative';
+                goalProgressEl.className = 'trend danger';
             }
         } else {
-            goalProgressEl.innerHTML = '<a href="budgets.html"> 🎯 Set budget first </a>';
-            goalProgressEl.className = 'trend';
+            // Improved call-to-action
+            goalProgressEl.innerHTML = `
+                <a href="budgets.html" class="inline-cta">
+                    <span>Set up budget tracking</span>
+                </a>
+            `;
+            goalProgressEl.className = 'trend budget-cta';
         }
     }
 }
@@ -362,6 +412,7 @@ function updateRecentActivity() {
         recentContainer.appendChild(item);
     });
 }
+
 function updateBudgetSummary(stats, budgets) {
     const budgetOverview = document.getElementById('budget-overview');
     if (!budgetOverview) return;
@@ -369,51 +420,66 @@ function updateBudgetSummary(stats, budgets) {
     budgetOverview.innerHTML = '';
     
     const activeBudgets = Object.entries(budgets)
-    .filter(([, budget]) => budget > 0)
-    .map(([category, budget]) => {
-        const spent = stats.categoryTotals[category.toLowerCase()] || 0;
-        const percentage = Math.round((spent / budget) * 100, 2);
-        return {category, budget, spent, percentage}
-    });
+        .filter(([, budget]) => budget > 0)
+        .map(([category, budget]) => {
+            const spent = stats.categoryTotals[category.toLowerCase()] || 0;
+            const percentage = Math.round((spent / budget) * 100, 2);
+            return {category, budget, spent, percentage}
+        });
     
     if (activeBudgets.length === 0) {
         budgetOverview.innerHTML = `
-            <div class="empty-state-small">
-                <p>No budgets set for this month. <a href="budgets.html">Create your budget →</a></p>
+            <div class="empty-state">
+
+                <h3>No budgets yet</h3>
+                <p>Create budgets to track your spending by category and stay on target.</p>
+                <div class="empty-state-actions">
+                    <a href="budgets.html" class="btn btn-primary btn-small">Create Budget</a>
+                </div>
             </div>
         `;
         return;
     }
 
-    // Sort by percentage used (highest first) and take top 3
+    // Sort by percentage used (highest first) and take top 4
     const topBudgets = activeBudgets
         .sort((a, b) => b.percentage - a.percentage)
         .slice(0, 4);
     
-    // Render top 3 budget progress items
+    // Render budget progress items with enhanced styling
     topBudgets.forEach(({ category, budget, spent, percentage }) => {
         const remaining = Math.max(budget - spent, 0);
         const overBudget = (budget - spent) < 0;
+        const statusClass = percentage >= 100 ? 'danger' : percentage >= 80 ? 'warning' : 'good';
+        
         const progressItem = document.createElement('div');
-        progressItem.className = 'budget-progress-item';
+        progressItem.className = `budget-progress-item status-${statusClass}`;
         progressItem.innerHTML = `
             <div class="progress-header">
                 <span class="progress-category">${category}</span>
                 <span class="progress-amount">${formatCurrency(spent)} / ${formatCurrency(budget)}</span>
             </div>
             <div class="progress-bar">
-                <div class="progress-fill ${percentage >= 100 ? 'danger' : percentage >= 80 ? 'warning' : 'good'}"
+                <div class="progress-fill ${statusClass}"
                     style="width: ${Math.min(percentage, 100)}%">
                 </div>
             </div>
             <div class="progress-footer">
-                <span class="progress-percentage ${percentage > 100 ? "font-bold" : ""}"> ${percentage}% used</span>
-                <span class="progress-remaining">${overBudget ? `<strong class="text-danger"> 🛑 ${formatCurrency(Math.abs(budget - spent))} over budget </strong>` : `${formatCurrency(remaining)} remaining`} </span>
+                <span class="progress-percentage ${percentage > 100 ? "font-bold" : ""}">
+                    ${percentage}% used
+                </span>
+                <span class="progress-remaining">
+                    ${overBudget ? 
+                        `<strong class="text-danger">🛑 ${formatCurrency(Math.abs(budget - spent))} over</strong>` : 
+                        `${formatCurrency(remaining)} remaining`
+                    }
+                </span>
             </div>
         `;
         budgetOverview.appendChild(progressItem);
     });
 }
+
 
 function initializeCharts() {
     // Check if Chart.js is available and canvases exist
