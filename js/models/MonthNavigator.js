@@ -1,10 +1,14 @@
 // Month Navigator Class
 export class MonthNavigator {
-    constructor(expenseList, updateCallback = null) { // Fixed: Accept callback as parameter
+    constructor(expenseList, updateCallback = null) { 
         this.expenseList = expenseList;
         this.currentDate = new Date();
-        this.selectedMonth = this.currentDate.getMonth();
-        this.selectedYear = this.currentDate.getFullYear();
+
+        // Loading from session storage, or fallback to the current date
+        const saved = JSON.parse(sessionStorage.getItem('selectedDate'));
+        this.selectedMonth = saved?.month ?? this.currentDate.getMonth();
+        this.selectedYear = saved?.year ?? this.currentDate.getFullYear();
+        
         this.minDate = this.getMinDate();
         this.maxDate = new Date();
         
@@ -55,6 +59,13 @@ export class MonthNavigator {
             this.selectedMonth = 0;
             this.selectedYear++;
         }
+
+        // Store the selected month and year in session storage
+        sessionStorage.setItem('selectedDate', JSON.stringify({
+            month: this.selectedMonth,
+            year: this.selectedYear
+        }));
+
         this.updateDisplay();
         this.onMonthChange();
     }

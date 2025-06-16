@@ -68,9 +68,6 @@ function initializeBudgetsPage() {
     
     // Initialize month navigator
     monthNavigator = initializeMonthNavigator();
-    
-    // Set current month display
-    updateMonthDisplay();
 }
 
 function setupStateListeners() {
@@ -430,6 +427,7 @@ function updateMonthDisplay() {
     const monthDisplay = document.getElementById('current-month-display');
     if (monthDisplay) {
         const state = stateManager.getState();
+        console.log(state)
         const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
             'July', 'August', 'September', 'October', 'November', 'December'];
         monthDisplay.textContent = `${monthNames[state.month]} ${state.year}`;

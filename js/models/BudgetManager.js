@@ -68,14 +68,7 @@ export class BudgetManager {
             if (savedData && typeof savedData === 'object') {
                 this.monthlyBudgets = { ...savedData };
             } else {
-                // Check for legacy single budget format
-                const legacyBudgets = this.loadFromStorage('budgets');
-                if (legacyBudgets && typeof legacyBudgets === 'object') {
-                    // Migrate legacy budgets to new format
-                    this.migrateLegacyBudgets(legacyBudgets);
-                } else {
-                    this.initializeDefaultBudgets();
-                }
+                this.initializeDefaultBudgets();
             }
         } catch (error) {
             console.error('Error loading budgets:', error);
@@ -83,17 +76,7 @@ export class BudgetManager {
         }
     }
     
-    migrateLegacyBudgets(legacyBudgets) {
-        // Convert old single budget to monthly format
-        const currentKey = this.getMonthKey();
-        this.monthlyBudgets[currentKey] = { ...legacyBudgets };
-        this.saveToStorage('monthlyBudgets', this.monthlyBudgets);
-        
-        // Remove old format
-        localStorage.removeItem('budgets');
-        
-        console.log('Migrated legacy budgets to monthly format');
-    }
+
     
     initializeDefaultBudgets() {
         const currentKey = this.getMonthKey();
